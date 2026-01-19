@@ -1,0 +1,25 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"target": "ES2023",
+		"outDir": "./dist",
+		"baseUrl": "./",
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"declaration": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"incremental": true,
+		"removeComments": true,
+		"resolvePackageJsonExports": true,
+		"strictNullChecks": true,
+		"noImplicitAny": false,
+		"strictBindCallApply": false,
+		"paths": {
+			"@atlas/types": ["../../libs/types/src/index.ts"],
+			"@atlas/database": ["../../libs/database/src/index.ts"]
+		}
+	}
+}

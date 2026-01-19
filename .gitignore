@@ -76,3 +76,20 @@ frontend/.vite/
 # Backend specific
 backend/dist/
 backend/coverage/
+
+# Prisma
+libs/database/node_modules/.prisma/
+libs/database/prisma/migrations/
+
+# IDE Cursor
+.cursor/
+
+# Auto-generated type declarations (если решите не коммитить)
+**/components.d.ts
+
+# Frontend build cache
+**/.vite/
+apps/frontend/.vite/
+
+# TypeScript cache
+*.tsbuildinfo
