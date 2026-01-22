@@ -1,6 +1,7 @@
 {
     "name": "@atlas/database",
     "version": "1.0.0",
+    "type": "module",
     "private": true,
     "scripts": {
         "lint": "echo 'No lint script for @atlas/database'",
@@ -11,9 +12,14 @@
         "prisma:format": "prisma format --schema=./prisma/schema.prisma"
     },
     "devDependencies": {
+        "@types/node": "^25.0.9",
+        "@types/pg": "^8.16.0",
         "prisma": "^7.2.0"
     },
     "dependencies": {
-        "@prisma/client": "^7.2.0"
+        "@prisma/adapter-pg": "^7.2.0",
+        "@prisma/client": "^7.2.0",
+        "dotenv": "^17.2.3",
+        "pg": "^8.17.1"
     }
 }

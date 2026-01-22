@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -11,6 +12,66 @@ model User {
   email     String   @unique              
   name      String                        
   createdAt DateTime @default(now())      
-  
+  passwordHash String                        
+  updatedAt DateTime @updatedAt      
+
+  portfolios Portfolio[]
+
   @@map("users")
+}
+
+model Portfolio {
+  id String @id @default(uuid())
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  description String?
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  transactions Transactions[]
+
+  @@map("portfolios")
+}
+
+model Asset {
+  id String @id @default(uuid())
+  name String
+  ticker String @unique
+  type AssetType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions Transactions[]
+
+  @@map("assets")
+}
+
+model Transactions {
+  id String @id @default(uuid())
+  quantity Float
+  price Decimal @db.Decimal(12, 2)
+  type TransactionType
+  date DateTime
+  createdAt DateTime @default(now())
+
+  portfolioId String
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  assetId String
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  @@map("transactions")
+}
+
+enum AssetType {
+  STOCK
+  BOND
+  FUND
+}
+
+enum TransactionType {
+  BUY
+  SELL
 }
