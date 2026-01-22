@@ -2,7 +2,7 @@
 	<div class="bg-slate-900 min-h-screen flex flex-row">
 		<AppSidebar />
 		<div class="w-full">
-			<AppTopPannel />
+			<AppTopPanel />
 		</div>
 	</div>
 </template>

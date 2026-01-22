@@ -12,7 +12,10 @@ const router = createRouter({
     {
       path: '/app',
       name: 'app',
-      component: () => import('../views/app/AppMainView.vue')
+      component: () => import('../shared/layout/AppLayout.vue'),
+      children: [
+        
+      ]
     },
   ],
 });
