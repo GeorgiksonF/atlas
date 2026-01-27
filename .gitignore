@@ -81,6 +81,9 @@ backend/coverage/
 libs/database/node_modules/.prisma/
 libs/database/prisma/migrations/
 
+# Prisma generated files
+libs/database/generated/
+
 # Auto-generated type declarations (если решите не коммитить)
 **/components.d.ts
 

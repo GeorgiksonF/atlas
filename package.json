@@ -8,8 +8,11 @@
   ],
 
   "scripts": {
+    "postinstall": "npm run db:generate",
+    "dev": "concurrently -n \"DB,FRONTEND,BACKEND\" -c \"blue,green,yellow\" \"npm run dev:db\" \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "npm run dev -w atlas-frontend",
     "dev:backend": "npm run start:dev -w backend",
+    "dev:db": "docker-compose -f docker/docker-compose.yml up",
 
     "lint": "npm run lint --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
@@ -23,6 +26,7 @@
   "devDependencies": {
     "typescript": "^5.3.0",
     "eslint": "^8.56.0",
-    "prettier": "^3.1.0"
+    "prettier": "^3.1.0",
+    "concurrently": "^9.1.0"
   }
 }
