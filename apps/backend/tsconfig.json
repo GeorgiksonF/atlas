@@ -17,6 +17,7 @@
 		"strictNullChecks": true,
 		"noImplicitAny": false,
 		"strictBindCallApply": false,
+		"strictPropertyInitialization": false,
 		"paths": {
 			"@atlas/types": ["../../libs/types/src/index.ts"],
 			"@atlas/database": ["../../libs/database/src/index.ts"]
