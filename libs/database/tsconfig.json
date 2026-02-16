@@ -9,5 +9,6 @@
     "target": "ES2023",
     "strict": true,
     "esModuleInterop": true,
-  }
+  },
+  "include": ["src/**/*.ts", "generated/**/*.ts"]
 }
