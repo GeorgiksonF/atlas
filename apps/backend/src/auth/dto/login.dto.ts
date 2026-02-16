@@ -1,6 +1,7 @@
+import type { LoginRequest } from '@atlas/types';
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
-export class LoginDto {
+export class LoginDto implements LoginRequest {
 	@IsEmail({}, { message: 'Email должен быть валидным адресом' })
 	email: string;
 
