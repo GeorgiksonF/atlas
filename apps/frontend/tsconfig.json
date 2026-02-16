@@ -11,9 +11,7 @@
 		"allowImportingTsExtensions": true,
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["./src/*"],
-			"@atlas/types": ["../../libs/types/src/index.ts"],
-			"@atlas/database": ["../../libs/database/src/index.ts"]
+			"@/*": ["./src/*"]
 		}
 	},
 	"include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],

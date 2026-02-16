@@ -16,9 +16,7 @@ export default defineConfig({
 	],
 	resolve: {
 		alias: {
-			'@': fileURLToPath(new URL('./src', import.meta.url)),
-			'@atlas/types': path.resolve(__dirname, '../../libs/types/src'),
-			'@atlas/database': path.resolve(__dirname, '../../libs/database/src'),
+			'@': fileURLToPath(new URL('./src', import.meta.url))
 		},
 	},
 	server: {
