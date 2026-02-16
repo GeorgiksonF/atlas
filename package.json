@@ -8,19 +8,20 @@
   ],
 
   "scripts": {
-    "postinstall": "npm run db:generate",
+    "postinstall": "npm run prisma:generate",
     "dev": "concurrently -n \"DB,FRONTEND,BACKEND\" -c \"blue,green,yellow\" \"npm run dev:db\" \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "npm run dev -w atlas-frontend",
-    "dev:backend": "npm run start:dev -w backend",
+    "dev:backend": "npm run start:dev -w atlas-backend",
     "dev:db": "docker-compose -f docker/docker-compose.yml up",
 
     "lint": "npm run lint --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build:libs && npm run build --workspaces --if-present",
+    "build:libs": "npm run build -w @atlas/types && npm run build -w @atlas/database",
 
-    "db:generate": "npm run prisma:generate -w @atlas/database",
-    "db:migrate": "npm run prisma:migrate -w @atlas/database",
-    "db:studio": "npm run prisma:studio -w @atlas/database",
-    "db:format": "npm run prisma:format -w @atlas/database"
+    "prisma:generate": "prisma generate --schema=libs/database/prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema=libs/database/prisma/schema.prisma",
+    "prisma:studio": "prisma studio --config=libs/database/prisma.config.ts",
+    "prisma:format": "prisma format --schema=libs/database/prisma/schema.prisma"
   },
 
   "devDependencies": {
