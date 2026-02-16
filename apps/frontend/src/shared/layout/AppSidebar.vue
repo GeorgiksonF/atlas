@@ -17,7 +17,7 @@
 		</div>
 		<div class="flex justify-center pt-4">
 			<RouterLink to="/app" class="flex flex-row items-center gap-2">
-				<img src="@/public/atlas-logo.svg" alt="Logo" class="w-10 h-10" />
+				<img src="@/assets/images/atlas-logo.svg" alt="Logo" class="w-10 h-10" />
 				<Transition name="fade">
 					<h1 class="text-2xl font-bold text-slate-50 whitespace-nowrap" v-show="isOpen">
 						Atlas

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import LandingView from '../views/landing/LandingView.vue';
-
+import LandingView from '../views/LandingView.vue';
+import LoginView from '../views/LoginView.vue';
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -10,11 +10,15 @@ const router = createRouter({
       component: LandingView
     },
     {
+      path: '/login',
+      name: 'login',
+      component: LoginView
+    },
+    {
       path: '/app',
       name: 'app',
-      component: () => import('../shared/layout/AppLayout.vue'),
+      component: () => import('../views/AppLayout.vue'),
       children: [
-        
       ]
     },
   ],
