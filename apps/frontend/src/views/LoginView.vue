@@ -11,15 +11,7 @@
 				<div class="mt-30">
 					<h2 class="text-2xl font-bold">Рады видеть вас снова!</h2>
 					<p class="text-slate-200">Введите свои данные для входа в систему</p>
-					<div class="mt-10 flex flex-col gap-4">
-						<InputText type="text" placeholder="Email" />
-						<InputText type="password" placeholder="Password" />
-						<Button>Войти</Button>
-						<div class="flex flex-col">
-							<p>Нет аккаунта?</p>
-							<Button severity="secondary" class="mt-2" @click="registerDialog = true">Зарегистрироваться</Button>
-						</div>
-					</div>
+					<LoginForm @open-register="registerDialog = true" />
 				</div>
 			</div>
 			<div class="w-3/5 text-slate-50">banner</div>
@@ -27,15 +19,14 @@
 		<div class="text-slate-50 text-center py-4">
 			footer
 		</div>
-		<RegisterModal :registerDialog="registerDialog" />
+		<RegisterModal v-model:register-dialog="registerDialog" />
 	</div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import LoginForm from '@/features/auth/components/LoginForm.vue';
 import RegisterModal from '@/features/auth/components/RegisterModal.vue';
 
 const registerDialog = ref(false);
-
-
 </script>

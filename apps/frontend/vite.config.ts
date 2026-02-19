@@ -16,7 +16,11 @@ export default defineConfig({
 	],
 	resolve: {
 		alias: {
-			'@': fileURLToPath(new URL('./src', import.meta.url))
+			'@': fileURLToPath(new URL('./src', import.meta.url)),
+			// монорепо: зависимости поднимаются в корень, Vite ищет в apps/frontend/node_modules
+			zod: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..', 'node_modules/zod'),
+			'vee-validate': path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..', 'node_modules/vee-validate'),
+			'@vee-validate/zod': path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..', 'node_modules/@vee-validate/zod'),
 		},
 	},
 	server: {
