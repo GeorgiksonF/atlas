@@ -11,6 +11,7 @@ import type {
 } from '@atlas/types';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { AUTH_ERROR_MESSAGES } from './constants/messages';
 
 @Injectable()
 export class AuthService {
@@ -25,11 +26,15 @@ export class AuthService {
 		});
 
 		if (existingUser) {
-			throw new UnauthorizedException('User already exists');
+			throw new UnauthorizedException(
+				AUTH_ERROR_MESSAGES.USER_ALREADY_EXISTS,
+			);
 		}
 
 		if (registerDto.password !== registerDto.confirmPassword) {
-			throw new BadRequestException('Пароли не совпадают');
+			throw new BadRequestException(
+				AUTH_ERROR_MESSAGES.PASSWORDS_DO_NOT_MATCH,
+			);
 		}
 
 		const passwordHash = await bcrypt.hash(registerDto.password, 10);
@@ -62,7 +67,9 @@ export class AuthService {
 		});
 
 		if (!user) {
-			throw new UnauthorizedException('Invalid credentials');
+			throw new UnauthorizedException(
+				AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS,
+			);
 		}
 
 		const isPasswordValid = await bcrypt.compare(
@@ -71,7 +78,9 @@ export class AuthService {
 		);
 
 		if (!isPasswordValid) {
-			throw new UnauthorizedException('Invalid credentials');
+			throw new UnauthorizedException(
+				AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS,
+			);
 		}
 
 		const payload = { email: user.email, sub: user.id };
