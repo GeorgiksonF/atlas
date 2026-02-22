@@ -13,22 +13,26 @@
     "dev:frontend": "npm run dev -w atlas-frontend",
     "dev:backend": "npm run start:dev -w atlas-backend",
     "dev:db": "docker-compose -f docker/docker-compose.yml up",
+    "db:up": "docker-compose -f docker/docker-compose.yml up -d",
+    "db:migrate": "npm run db:up && npx wait-on tcp:localhost:5433 -t 30000 && npm run prisma:migrate",
 
     "lint": "npm run lint --workspaces --if-present",
     "build": "npm run build:libs && npm run build --workspaces --if-present",
     "build:libs": "npm run build -w @atlas/types && npm run build -w @atlas/database",
 
     "prisma:generate": "prisma generate --schema=libs/database/prisma/schema.prisma",
-    "prisma:migrate": "prisma migrate dev --schema=libs/database/prisma/schema.prisma",
+    "prisma:migrate": "npm run prisma:migrate -w @atlas/database",
+    "prisma:reset": "npm run prisma:reset -w @atlas/database",
     "prisma:studio": "prisma studio --config=libs/database/prisma.config.ts",
     "prisma:format": "prisma format --schema=libs/database/prisma/schema.prisma",
-    "db:fix-collation": "docker exec atlas-postgres psql -U postgres -d postgres -c \"ALTER DATABASE postgres REFRESH COLLATION VERSION;\" && docker exec atlas-postgres psql -U postgres -d atlas -c \"ALTER DATABASE atlas REFRESH COLLATION VERSION;\""
+    "db:fix-collation": "docker exec atlas-postgres psql -U postgres -d postgres -c \"ALTER DATABASE template1 REFRESH COLLATION VERSION;\" && docker exec atlas-postgres psql -U postgres -d postgres -c \"ALTER DATABASE postgres REFRESH COLLATION VERSION;\" && docker exec atlas-postgres psql -U postgres -d atlas -c \"ALTER DATABASE atlas REFRESH COLLATION VERSION;\""
   },
 
   "devDependencies": {
     "typescript": "^5.3.0",
     "eslint": "^8.56.0",
     "prettier": "^3.1.0",
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "wait-on": "^8.0.1"
   }
 }

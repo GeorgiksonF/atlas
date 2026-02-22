@@ -44,6 +44,7 @@ model Asset {
   updatedAt DateTime @updatedAt
 
   transactions Transactions[]
+  quote Quote?
 
   @@map("assets")
 }
@@ -65,6 +66,18 @@ model Transactions {
   @@map("transactions")
 }
 
+model Quote {
+  id String @id @default(uuid())
+  price Decimal @db.Decimal(12, 2)
+  currency CurrencyType
+  updatedAt DateTime @updatedAt
+  
+  assetId String @unique
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@map("quotes")
+}
+
 enum AssetType {
   STOCK
   BOND
@@ -74,4 +87,8 @@ enum AssetType {
 enum TransactionType {
   BUY
   SELL
+}
+
+enum CurrencyType {
+  RUB
 }
