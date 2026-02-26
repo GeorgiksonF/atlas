@@ -1,67 +1,103 @@
 <template>
-	<div class="mt-10 flex flex-col gap-4">
-		<form
-			id="login-form"
-			class="flex flex-col gap-4"
-			@submit="onSubmit"
-		>
-			<div class="flex flex-col gap-1 w-full">
-				<InputGroup class="w-full">
-					<InputGroupAddon>
-						<i class="pi pi-envelope" />
-					</InputGroupAddon>
-					<FloatLabel class="block w-full flex-1" variant="on">
-						<InputText
-							id="login-email"
-							type="email"
-							class="w-full"
-							v-model="emailValue"
-							:invalid="!!emailError"
-							@blur="emailBlur"
-						/>
-						<label for="login-email">Email</label>
-					</FloatLabel>
-				</InputGroup>
-				<Message v-if="emailError" severity="error" class="w-full" variant="simple">{{
-					emailErrorText
-				}}</Message>
-			</div>
-			<div class="flex flex-col gap-1 w-full">
-				<InputGroup class="w-full">
-					<InputGroupAddon>
-						<i class="pi pi-lock" />
-					</InputGroupAddon>
-					<FloatLabel class="block w-full flex-1" variant="on">
-						<Password
-							input-id="login-password"
-							v-model="passwordValue"
-							:invalid="!!passwordError"
-							:feedback="false"
-							toggle-mask
-							fluid
-							@blur="passwordBlur"
-						/>
-						<label for="login-password">Пароль</label>
-					</FloatLabel>
-				</InputGroup>
-				<Message v-if="passwordError" severity="error" class="w-full" variant="simple">{{
-					passwordErrorText
-				}}</Message>
-			</div>
-			<Message v-if="submitError" severity="error" class="w-full" variant="simple">{{
-				submitError
-			}}</Message>
-			<Button type="submit" :loading="loading" :disabled="loading">
-				Войти
-			</Button>
-		</form>
-		<div class="flex flex-col">
-			<p>Нет аккаунта?</p>
-			<Button severity="secondary" class="mt-2" type="button" @click="emit('open-register')">
-				Зарегистрироваться
-			</Button>
-		</div>
-	</div>
+  <div class="mt-10 flex flex-col gap-4">
+    <form
+      id="login-form"
+      class="flex flex-col gap-4"
+      @submit="onSubmit"
+    >
+      <div class="flex flex-col gap-1 w-full">
+        <InputGroup class="w-full">
+          <InputGroupAddon>
+            <i class="pi pi-envelope" />
+          </InputGroupAddon>
+          <FloatLabel
+            class="block w-full flex-1"
+            variant="on"
+          >
+            <InputText
+              id="login-email"
+              v-model="emailValue"
+              type="email"
+              class="w-full"
+              :invalid="!!emailError"
+              @blur="emailBlur"
+            />
+            <label for="login-email">Email</label>
+          </FloatLabel>
+        </InputGroup>
+        <Message
+          v-if="emailError"
+          severity="error"
+          class="w-full"
+          variant="simple"
+        >
+          {{
+            emailErrorText
+          }}
+        </Message>
+      </div>
+      <div class="flex flex-col gap-1 w-full">
+        <InputGroup class="w-full">
+          <InputGroupAddon>
+            <i class="pi pi-lock" />
+          </InputGroupAddon>
+          <FloatLabel
+            class="block w-full flex-1"
+            variant="on"
+          >
+            <Password
+              v-model="passwordValue"
+              input-id="login-password"
+              :invalid="!!passwordError"
+              :feedback="false"
+              toggle-mask
+              fluid
+              @blur="passwordBlur"
+            />
+            <label for="login-password">Пароль</label>
+          </FloatLabel>
+        </InputGroup>
+        <Message
+          v-if="passwordError"
+          severity="error"
+          class="w-full"
+          variant="simple"
+        >
+          {{
+            passwordErrorText
+          }}
+        </Message>
+      </div>
+      <Message
+        v-if="submitError"
+        severity="error"
+        class="w-full"
+        variant="simple"
+      >
+        {{
+          submitError
+        }}
+      </Message>
+      <Button
+        type="submit"
+        :loading="loading"
+        :disabled="loading"
+      >
+        Войти
+      </Button>
+    </form>
+    <div class="flex flex-col">
+      <p>Нет аккаунта?</p>
+      <Button
+        severity="secondary"
+        class="mt-2"
+        type="button"
+        @click="emit('open-register')"
+      >
+        Зарегистрироваться
+      </Button>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
