@@ -1,5 +1,11 @@
 <template>
-	<Dialog v-model:visible="isOpen" class="w-1/5" modal @after-hide="resetForm">
+	<Dialog
+		v-model:visible="isOpen"
+		class="bg-slate-800! w-1/5"
+		modal
+		:draggable="false"
+		@after-hide="resetForm"
+	>
 		<template #header>
 			<h2>Регистрация</h2>
 		</template>

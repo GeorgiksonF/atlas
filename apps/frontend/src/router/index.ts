@@ -19,7 +19,22 @@ const router = createRouter({
       name: 'app',
       component: () => import('../views/AppLayout.vue'),
       children: [
-      ]
+        {
+          path: 'portfolio',
+          name: 'portfolio',
+          component: () => import('../views/PortfolioView.vue'),
+        },
+        {
+          path: 'analytics',
+          name: 'analytics',
+          component: () => import('../views/AnalyticsView.vue'),
+        },
+        {
+          path: 'portfolio/new',
+          name: 'createPortfolio',
+          component: () => import('../views/CreatePortfolioView.vue'),
+        },
+      ],
     },
   ],
 });
