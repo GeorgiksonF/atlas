@@ -9,7 +9,7 @@ import { createPrismaClient, PrismaClient } from '@atlas/database';
 			provide: PrismaClient,
 			useFactory: (config: ConfigService): PrismaClient => {
 				const url = config.getOrThrow<string>('DATABASE_URL');
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return -- типы из @atlas/database не резолвятся в ESLint
+
 				return createPrismaClient(url);
 			},
 			inject: [ConfigService],
