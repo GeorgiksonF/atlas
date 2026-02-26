@@ -23,6 +23,7 @@ model User {
 model Portfolio {
   id String @id @default(uuid())
   name String
+  category PortfolioCategory @default(INVESTMENTS)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   description String?
@@ -33,6 +34,11 @@ model Portfolio {
   transactions Transactions[]
 
   @@map("portfolios")
+}
+
+enum PortfolioCategory {
+  INVESTMENTS
+  CRYPTO
 }
 
 model Asset {
