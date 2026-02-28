@@ -21,15 +21,16 @@ model User {
 }
 
 model Portfolio {
-  id String @id @default(uuid())
-  name String
-  category PortfolioCategory @default(INVESTMENTS)
+  id        String   @id @default(uuid())
+  name      String
+  category  PortfolioCategory @default(INVESTMENTS)
+  broker    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   description String?
 
   userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   transactions Transactions[]
 
