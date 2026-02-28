@@ -102,6 +102,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useToast } from 'primevue/usetoast';
@@ -111,6 +112,7 @@ import { useAuthStore } from '../stores/authStore';
 import { login } from '../constants/messages';
 import { loginSchema, type LoginFormValues } from '../schemas/loginSchema';
 
+const router = useRouter();
 const toast = useToast();
 const emit = defineEmits<{ 'open-register': [] }>();
 
@@ -146,6 +148,7 @@ async function onLogin(values: LoginFormValues): Promise<void> {
 			detail: login.toastSuccessDetail,
 			life: 3000,
 		});
+		await router.push({ name: 'portfolio' });
 	} catch (err: unknown) {
 		const errorText = getErrorMessage(err, login.errorFallback);
 		submitError.value = errorText;

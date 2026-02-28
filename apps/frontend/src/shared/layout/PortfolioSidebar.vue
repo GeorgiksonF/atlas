@@ -1,6 +1,6 @@
 <template>
 	<aside
-		class="absolute left-0 top-0 bottom-0 z-10 flex w-90 flex-col border-r border-slate-600 bg-slate-800"
+		class="absolute left-0 top-0 bottom-0 z-10 flex w-90 flex-col border-r border-slate-600 bg-slate-900"
 	>
 		<div class="flex flex-col gap-1 overflow-y-auto p-3">
 			<PortfolioCard

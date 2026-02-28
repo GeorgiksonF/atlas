@@ -118,6 +118,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useToast } from 'primevue/usetoast';
@@ -127,6 +128,7 @@ import { useAuthStore } from '../stores/authStore';
 import { register } from '../constants/messages';
 import { registerSchema, type RegisterFormValues } from '../schemas/registerSchema';
 
+const router = useRouter();
 const toast = useToast();
 
 const props = defineProps<{
@@ -219,6 +221,7 @@ async function onRegister(values: {
 			life: 3000,
 		});
 		close();
+		await router.push({ name: 'portfolio' });
 	} catch (err: unknown) {
 		const errorText = getErrorMessage(err, register.errorFallback);
 		submitError.value = errorText;
