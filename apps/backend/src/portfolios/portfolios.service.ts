@@ -11,11 +11,16 @@ import type {
 	PortfoliosResponse,
 	UpdatePortfolio,
 } from '@atlas/types';
+import { PORTFOLIO_BROKERS } from './constants/brokers';
 import { PORTFOLIO_ERROR_MESSAGES } from './constants/messages';
 
 @Injectable()
 export class PortfoliosService {
 	constructor(private readonly prisma: PrismaClient) {}
+
+	getBrokers(): string[] {
+		return [...PORTFOLIO_BROKERS];
+	}
 
 	async findAllByUserId(userId: string): Promise<PortfoliosResponse> {
 		if (!userId) {

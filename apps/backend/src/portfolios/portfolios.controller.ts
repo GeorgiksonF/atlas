@@ -23,6 +23,11 @@ export class PortfoliosController {
 		return this.portfoliosService.findAllByUserId(req.user.userId);
 	}
 
+	@Get('brokers')
+	getBrokers() {
+		return this.portfoliosService.getBrokers();
+	}
+
 	@Post()
 	create(
 		@Request() req: { user: { userId: string } },
