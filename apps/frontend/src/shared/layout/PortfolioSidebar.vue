@@ -9,7 +9,7 @@
 				subtitle="составной"
 				value="—"
 				:active="activePortfolioId === 'all'"
-				@click="portfoliosStore.setActivePortfolio('all')"
+				@click="selectPortfolio('all')"
 			/>
 
 			<CollapsibleSection
@@ -25,7 +25,7 @@
 						:subtitle="getPortfolioCategoryLabel(p.category)"
 						:value="'1 000 000 000 ₽'"
 						:active="activePortfolioId === p.id"
-						@click="portfoliosStore.setActivePortfolio(p.id)"
+						@click="selectPortfolio(p.id)"
 					>
 						<template #actions>
 							<Button
@@ -70,6 +70,11 @@ const portfolioMenuItems = computed(() => [
 	{ label: 'Редактировать', icon: 'pi pi-pencil' },
 	{ label: 'Удалить', icon: 'pi pi-trash' },
 ]);
+
+function selectPortfolio(id: string | 'all') {
+	portfoliosStore.setActivePortfolio(id);
+	portfoliosStore.closePortfolioSidebar();
+}
 
 function openPortfolioMenu(e: Event, portfolio: PortfolioResponse) {
 	menuPortfolioContext.value = portfolio;

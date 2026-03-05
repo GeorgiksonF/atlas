@@ -18,6 +18,7 @@ const router = createRouter({
       path: '/app',
       name: 'app',
       component: () => import('../views/AppLayout.vue'),
+      redirect: { name: 'portfolio' },
       children: [
         {
           path: 'portfolio',

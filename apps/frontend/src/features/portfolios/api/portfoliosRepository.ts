@@ -12,6 +12,11 @@ export const portfoliosRepository = {
 		return data;
 	},
 
+	async getBrokers(): Promise<string[]> {
+		const { data } = await apiClient.get<string[]>('/portfolios/brokers');
+		return data;
+	},
+
 	async create(body: CreatePortfolio): Promise<PortfolioResponse> {
 		const { data } = await apiClient.post<PortfolioResponse>('/portfolios', body);
 		return data;
