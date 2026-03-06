@@ -94,6 +94,11 @@ const navbarItems = ref([
 		icon: 'fa-solid fa-chart-line',
 		url: '/app/analytics',
 	},
+	{
+		label: 'Управление портфелями',
+		icon: 'fa-solid fa-sliders',
+		url: '/app/management',
+	},
 ]);
 </script>
 

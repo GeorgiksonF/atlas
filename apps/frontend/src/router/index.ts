@@ -35,6 +35,11 @@ const router = createRouter({
           name: 'createPortfolio',
           component: () => import('../views/CreatePortfolioView.vue'),
         },
+        {
+          path: 'management',
+          name: 'portfolioManagement',
+          component: () => import('../views/ManagePortfoliosView.vue'),
+        },
       ],
     },
   ],
