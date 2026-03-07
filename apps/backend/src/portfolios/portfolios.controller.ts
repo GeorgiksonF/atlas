@@ -28,6 +28,14 @@ export class PortfoliosController {
 		return this.portfoliosService.getBrokers();
 	}
 
+	@Get(':id')
+	getById(
+		@Param('id') id: string,
+		@Request() req: { user: { userId: string } },
+	) {
+		return this.portfoliosService.findById(id, req.user.userId);
+	}
+
 	@Post()
 	create(
 		@Request() req: { user: { userId: string } },

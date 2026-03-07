@@ -33,6 +33,28 @@ export class PortfoliosService {
 		});
 	}
 
+	async findById(id: string, userId: string): Promise<PortfolioResponse> {
+		if (!userId) {
+			throw new BadRequestException(
+				PORTFOLIO_ERROR_MESSAGES.USER_ID_REQUIRED,
+			);
+		}
+		const portfolio = await this.prisma.portfolio.findUnique({
+			where: { id },
+		});
+		if (!portfolio) {
+			throw new NotFoundException(
+				PORTFOLIO_ERROR_MESSAGES.PORTFOLIO_NOT_FOUND,
+			);
+		}
+		if (portfolio.userId !== userId) {
+			throw new ForbiddenException(
+				PORTFOLIO_ERROR_MESSAGES.PORTFOLIO_ACCESS_DENIED,
+			);
+		}
+		return portfolio;
+	}
+
 	async create(
 		userId: string,
 		dto: CreatePortfolio,
