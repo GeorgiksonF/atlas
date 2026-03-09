@@ -7,11 +7,17 @@ export type ActivePortfolioId = string | 'all' | null;
 
 export const usePortfoliosStore = defineStore('portfolios', () => {
 	const portfolios = ref<PortfolioResponse[]>([]);
+	const loading = ref(false);
 	const activePortfolioId = ref<ActivePortfolioId>('all');
 	const isPortfolioSidebarOpen = ref(false);
 
 	async function fetchPortfolios() {
-		portfolios.value = await portfoliosRepository.getList();
+		loading.value = true;
+		try {
+			portfolios.value = await portfoliosRepository.getList();
+		} finally {
+			loading.value = false;
+		}
 	}
 
 	function setActivePortfolio(id: ActivePortfolioId) {
@@ -31,11 +37,18 @@ export const usePortfoliosStore = defineStore('portfolios', () => {
 		return portfolios.value.find((p) => p.id === activePortfolioId.value) ?? null;
 	}
 
+	async function deletePortfolio(id: string): Promise<void> {
+		await portfoliosRepository.delete(id);
+		portfolios.value = portfolios.value.filter((p) => p.id !== id);
+	}
+
 	return {
 		portfolios,
+		loading,
 		activePortfolioId,
 		isPortfolioSidebarOpen,
 		fetchPortfolios,
+		deletePortfolio,
 		setActivePortfolio,
 		togglePortfolioSidebar,
 		closePortfolioSidebar,

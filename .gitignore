@@ -92,3 +92,6 @@ apps/frontend/.vite/
 
 # TypeScript cache
 *.tsbuildinfo
+
+# Cursor
+.cursor/

@@ -16,5 +16,31 @@ export const preset = definePreset(Aura, {
 			900: '{indigo.900}',
 			950: '{indigo.950}',
 		},
+		colorScheme: {
+			light: {
+				formField: {
+					background: '{slate.100}',
+					hoverBackground: '{slate.200}',
+					focusBackground: '{slate.100}',
+					color: '{slate.800}',
+					placeholderColor: '{slate.500}',
+					borderColor: '{slate.300}',
+					hoverBorderColor: '{slate.400}',
+					focusBorderColor: '{primary.500}',
+				},
+			},
+			dark: {
+				formField: {
+					background: '{slate.900}',
+					hoverBackground: '{slate.700}',
+					focusBackground: '{slate.800}',
+					color: '{slate.200}',
+					placeholderColor: '{slate.400}',
+					borderColor: '{slate.600}',
+					hoverBorderColor: '{slate.500}',
+					focusBorderColor: '{primary.400}',
+				},
+			},
+		},
 	},
 });

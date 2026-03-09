@@ -40,6 +40,11 @@ const router = createRouter({
           name: 'portfolioManagement',
           component: () => import('../views/ManagePortfoliosView.vue'),
         },
+        {
+          path: 'management/:id/edit',
+          name: 'editPortfolio',
+          component: () => import('../views/EditPortfolioView.vue'),
+        },
       ],
     },
   ],

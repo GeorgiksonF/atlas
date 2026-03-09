@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <Toast />
+    <ConfirmDialog />
     <RouterView />
   </div>
 </template>

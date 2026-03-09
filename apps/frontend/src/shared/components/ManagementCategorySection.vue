@@ -5,7 +5,7 @@
 	>
 		<button
 			type="button"
-			class="flex w-full items-center gap-3 rounded-lg text-left text-slate-300 hover:bg-slate-700/50"
+			class="flex w-full items-center gap-3 rounded-lg text-left text-slate-300 hover:cursor-pointer"
 			@click="$emit('update:modelValue', !modelValue)"
 		>
 			<i :class="icon" class="shrink-0 text-slate-400" />
