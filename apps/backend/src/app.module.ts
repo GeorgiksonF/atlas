@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { PortfoliosModule } from './portfolios/portfolios.module';
+import { PrismaModule } from './prisma/prisma.module';
 import path from 'node:path';
 
 @Module({
@@ -12,6 +13,7 @@ import path from 'node:path';
 		}),
 		PrismaModule,
 		AuthModule,
+		PortfoliosModule,
 	],
 	controllers: [],
 	providers: [],

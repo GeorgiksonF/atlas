@@ -79,7 +79,6 @@ backend/coverage/
 
 # Prisma
 libs/database/node_modules/.prisma/
-libs/database/prisma/migrations/
 
 # Prisma generated files
 libs/database/generated/
@@ -93,3 +92,6 @@ apps/frontend/.vite/
 
 # TypeScript cache
 *.tsbuildinfo
+
+# Cursor
+.cursor/

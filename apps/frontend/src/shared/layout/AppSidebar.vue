@@ -1,53 +1,68 @@
 <template>
 	<aside
-		class="bg-slate-700 min-h-screen border-r-2 border-slate-500 transition-all duration-300 relative group"
+		class="min-h-screen flex flex-col bg-slate-800 border-r border-slate-600 transition-[width] duration-300 ease-out relative group shrink-0"
 		:class="isOpen ? 'w-64' : 'w-20'"
 	>
 		<div
-			class="absolute top-30 right-0 z-10 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+			class="absolute top-20 -right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
 		>
 			<Button
-				:icon="isOpen ? 'pi pi-arrow-right' : 'pi pi-arrow-left'"
+				:icon="isOpen ? 'pi pi-chevron-left' : 'pi pi-chevron-right'"
 				severity="secondary"
 				rounded
 				size="small"
 				aria-label="sidebar-toggle"
+				class="shadow-md!"
 				@click="isOpen = !isOpen"
 			/>
 		</div>
-		<div class="flex justify-center pt-4">
-			<RouterLink to="/app" class="flex flex-row items-center gap-2">
-				<img src="@/assets/images/atlas-logo.svg" alt="Logo" class="w-10 h-10" />
+
+		<div class="flex justify-center pt-5 pb-2">
+			<RouterLink
+				to="/app"
+				class="sidebar-link flex flex-row items-center gap-3 rounded-lg py-2 outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-700"
+				:class="isOpen ? 'px-3' : 'px-2'"
+			>
+				<img src="@/assets/images/atlas-logo.svg" alt="Logo" class="h-10 w-10 shrink-0" />
 				<Transition name="fade">
-					<h1 class="text-2xl font-bold text-slate-50 whitespace-nowrap" v-show="isOpen">
+					<h1
+						v-show="isOpen"
+						class="text-3xl font-semibold text-slate-50 whitespace-nowrap"
+					>
 						Atlas
 					</h1>
 				</Transition>
 			</RouterLink>
 		</div>
-		<div class="flex flex-col items-center justify-center mt-4">
-			<Button class="w-2/3 flex flex-row items-center gap-2" @click="toggleQuickActionsMenu">
-				<i class="pi pi-plus" :class="[isOpen ? 'mr-5' : 'mr-0']" />
+
+		<div class="flex justify-center px-2 pt-15">
+			<Button
+				class="sidebar-action w-full flex flex-row items-center justify-center gap-2 rounded-lg py-2.5"
+				:class="isOpen ? 'px-4' : 'px-0'"
+				@click="toggleQuickActionsMenu"
+			>
+				<i class="pi pi-plus shrink-0" :class="isOpen ? 'text-base' : 'text-lg'" />
 				<Transition name="fade">
-					<span v-show="isOpen">Действия</span>
+					<span v-show="isOpen" class="text-sm font-medium">Действия</span>
 				</Transition>
 			</Button>
-			<Menu ref="menu" id="actions-menu" :model="quickActions" :popup="true" />
+			<Menu id="actions-menu" ref="menu" :model="quickActions" :popup="true" />
 		</div>
-		<ul class="mt-8 flex flex-col items-center justify-center">
-			<li v-for="item in navbarItems" :key="item.label">
-				<RouterLink
-					:to="item.url"
-					class="flex flex-row items-center gap-6 mt-2 text-slate-100 hover:bg-slate-600 rounded-md"
-					:class="isOpen ? 'px-8 py-2' : 'px-2 py-2 justify-center w-14'"
-				>
-					<i :class="item.icon" class="text-l" />
-					<Transition name="fade">
-						<span v-show="isOpen">{{ item.label }}</span>
-					</Transition>
-				</RouterLink>
-			</li>
-		</ul>
+		<nav class="mt-6 flex flex-1 flex-col gap-2 px-2">
+			<RouterLink
+				v-for="item in navbarItems"
+				:key="item.label"
+				:to="item.url"
+				active-class="sidebar-item-active"
+				class="sidebar-item flex flex-row items-center gap-3 rounded-lg py-2.5 text-slate-200 transition-colors"
+				:class="[isOpen ? 'px-4' : 'justify-center px-0']"
+			>
+				<i :class="item.icon" class="text-lg shrink-0 w-6 text-center" />
+				<Transition name="fade">
+					<span v-show="isOpen" class="text-sm font-medium">{{ item.label }}</span>
+				</Transition>
+			</RouterLink>
+		</nav>
 	</aside>
 </template>
 
@@ -79,13 +94,39 @@ const navbarItems = ref([
 		icon: 'fa-solid fa-chart-line',
 		url: '/app/analytics',
 	},
+	{
+		label: 'Управление портфелями',
+		icon: 'fa-solid fa-sliders',
+		url: '/app/management',
+	},
 ]);
 </script>
 
 <style scoped>
+.sidebar-link {
+	text-decoration: none;
+}
+.sidebar-link:hover {
+	background-color: rgb(71 85 105);
+}
+
+.sidebar-item {
+	text-decoration: none;
+}
+.sidebar-item:hover {
+	background-color: rgb(71 85 105);
+}
+.sidebar-item-active {
+	background-color: rgb(51 65 85);
+	color: rgb(248 250 252);
+}
+.sidebar-item-active:hover {
+	background-color: rgb(71 85 105);
+}
+
 .fade-enter-active,
 .fade-leave-active {
-	transition: opacity 0.3s ease, transform 0.3s ease;
+	transition: opacity 0.2s ease;
 }
 
 .fade-enter-from,

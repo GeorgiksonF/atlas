@@ -1,5 +1,11 @@
 <template>
-	<Dialog v-model:visible="isOpen" class="w-1/5" modal @after-hide="resetForm">
+	<Dialog
+		v-model:visible="isOpen"
+		class="bg-slate-800! w-1/5"
+		modal
+		:draggable="false"
+		@after-hide="resetForm"
+	>
 		<template #header>
 			<h2>Регистрация</h2>
 		</template>
@@ -12,18 +18,18 @@
 					<FloatLabel class="block w-full flex-1" variant="on">
 						<InputText
 							id="register-name"
+							v-model="nameValue"
 							type="text"
 							class="w-full"
-							v-model="nameValue"
 							:invalid="!!nameError"
 							@blur="nameBlur"
 						/>
 						<label for="register-name">Имя</label>
 					</FloatLabel>
 				</InputGroup>
-				<Message v-if="nameError" severity="error" class="w-full" variant="simple">{{
-					nameErrorText
-				}}</Message>
+				<Message v-if="nameError" severity="error" class="w-full" variant="simple">
+					{{ nameErrorText }}
+				</Message>
 			</div>
 			<div class="flex flex-col gap-1 w-full">
 				<InputGroup class="w-full">
@@ -33,18 +39,18 @@
 					<FloatLabel class="block w-full flex-1" variant="on">
 						<InputText
 							id="register-email"
+							v-model="emailValue"
 							type="email"
 							class="w-full"
-							v-model="emailValue"
 							:invalid="!!emailError"
 							@blur="emailBlur"
 						/>
 						<label for="register-email">Email</label>
 					</FloatLabel>
 				</InputGroup>
-				<Message v-if="emailError" severity="error" class="w-full" variant="simple">{{
-					emailErrorText
-				}}</Message>
+				<Message v-if="emailError" severity="error" class="w-full" variant="simple">
+					{{ emailErrorText }}
+				</Message>
 			</div>
 			<div class="flex flex-col gap-1 w-full">
 				<InputGroup class="w-full">
@@ -53,8 +59,8 @@
 					</InputGroupAddon>
 					<FloatLabel class="block w-full flex-1" variant="on">
 						<Password
-							input-id="register-password"
 							v-model="passwordValue"
+							input-id="register-password"
 							:invalid="!!passwordError"
 							:feedback="false"
 							toggle-mask
@@ -64,9 +70,9 @@
 						<label for="register-password">Пароль</label>
 					</FloatLabel>
 				</InputGroup>
-				<Message v-if="passwordError" severity="error" class="w-full" variant="simple">{{
-					passwordErrorText
-				}}</Message>
+				<Message v-if="passwordError" severity="error" class="w-full" variant="simple">
+					{{ passwordErrorText }}
+				</Message>
 			</div>
 			<div class="flex flex-col gap-1 w-full">
 				<InputGroup class="w-full">
@@ -75,8 +81,8 @@
 					</InputGroupAddon>
 					<FloatLabel class="block w-full flex-1" variant="on">
 						<Password
-							input-id="register-confirmPassword"
 							v-model="confirmPasswordValue"
+							input-id="register-confirmPassword"
 							:invalid="!!confirmPasswordError"
 							:feedback="false"
 							toggle-mask
@@ -91,12 +97,13 @@
 					severity="error"
 					class="w-full"
 					variant="simple"
-					>{{ confirmPasswordErrorText }}</Message
 				>
+					{{ confirmPasswordErrorText }}
+				</Message>
 			</div>
-			<Message v-if="submitError" severity="error" class="w-full" variant="simple">{{
-				submitError
-			}}</Message>
+			<Message v-if="submitError" severity="error" class="w-full" variant="simple">
+				{{ submitError }}
+			</Message>
 		</form>
 		<template #footer>
 			<Button type="submit" :loading="loading" :disabled="loading" form="register-form">
@@ -111,6 +118,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useToast } from 'primevue/usetoast';
@@ -120,6 +128,7 @@ import { useAuthStore } from '../stores/authStore';
 import { register } from '../constants/messages';
 import { registerSchema, type RegisterFormValues } from '../schemas/registerSchema';
 
+const router = useRouter();
 const toast = useToast();
 
 const props = defineProps<{
@@ -212,6 +221,7 @@ async function onRegister(values: {
 			life: 3000,
 		});
 		close();
+		await router.push({ name: 'portfolio' });
 	} catch (err: unknown) {
 		const errorText = getErrorMessage(err, register.errorFallback);
 		submitError.value = errorText;

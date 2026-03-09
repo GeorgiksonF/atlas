@@ -18,8 +18,34 @@ const router = createRouter({
       path: '/app',
       name: 'app',
       component: () => import('../views/AppLayout.vue'),
+      redirect: { name: 'portfolio' },
       children: [
-      ]
+        {
+          path: 'portfolio',
+          name: 'portfolio',
+          component: () => import('../views/PortfolioView.vue'),
+        },
+        {
+          path: 'analytics',
+          name: 'analytics',
+          component: () => import('../views/AnalyticsView.vue'),
+        },
+        {
+          path: 'portfolio/new',
+          name: 'createPortfolio',
+          component: () => import('../views/CreatePortfolioView.vue'),
+        },
+        {
+          path: 'management',
+          name: 'portfolioManagement',
+          component: () => import('../views/ManagePortfoliosView.vue'),
+        },
+        {
+          path: 'management/:id/edit',
+          name: 'editPortfolio',
+          component: () => import('../views/EditPortfolioView.vue'),
+        },
+      ],
     },
   ],
 });
