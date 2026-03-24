@@ -14,9 +14,6 @@ import { TRANSACTION_ERROR_MESSAGES } from './constants/messages';
 import { PortfoliosService } from '../portfolios/portfolios.service';
 import { AssetsService } from '../assets/assets.service';
 
-const TRADE_TYPES = ['BUY', 'SELL'] as const;
-const CASH_TYPES = ['DEPOSIT', 'WITHDRAWAL'] as const;
-
 function toResponse(row: {
 	id: string;
 	quantity: number;
@@ -97,12 +94,8 @@ export class TransactionsService {
 	): Promise<TransactionResponse> {
 		await this.ensurePortfolioAccess(portfolioId, userId);
 
-		const isTrade = TRADE_TYPES.includes(
-			dto.type as (typeof TRADE_TYPES)[number],
-		);
-		const isCash = CASH_TYPES.includes(
-			dto.type as (typeof CASH_TYPES)[number],
-		);
+		const isTrade = dto.type === 'BUY' || dto.type === 'SELL';
+		const isCash = dto.type === 'DEPOSIT' || dto.type === 'WITHDRAWAL';
 
 		if (isTrade) {
 			if (!dto.assetId) {
@@ -152,10 +145,8 @@ export class TransactionsService {
 			);
 		}
 
-		const isTrade = (t: string) =>
-			TRADE_TYPES.includes(t as (typeof TRADE_TYPES)[number]);
-		const isCash = (t: string) =>
-			CASH_TYPES.includes(t as (typeof CASH_TYPES)[number]);
+		const isTrade = (t: string) => t === 'BUY' || t === 'SELL';
+		const isCash = (t: string) => t === 'DEPOSIT' || t === 'WITHDRAWAL';
 		const type = dto.type ?? existing.type;
 
 		if (dto.assetId !== undefined) {

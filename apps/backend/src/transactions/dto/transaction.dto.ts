@@ -1,4 +1,5 @@
 import type { CreateTransaction, UpdateTransaction } from '@atlas/types';
+import { TRANSACTION_TYPES } from '../constants/transactionTypes';
 import {
 	IsDateString,
 	IsIn,
@@ -9,7 +10,6 @@ import {
 	IsUUID,
 } from 'class-validator';
 
-const TRANSACTION_TYPES = ['BUY', 'SELL', 'DEPOSIT', 'WITHDRAWAL'] as const;
 const CURRENCIES = ['RUB', 'USD'] as const;
 
 export class CreateTransactionDto implements CreateTransaction {
