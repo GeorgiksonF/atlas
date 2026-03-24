@@ -1,3 +1,5 @@
+import type { CurrencyType } from './quotes';
+
 export type AssetType = 'STOCK' | 'BOND' | 'FUND';
 
 export type CreateAsset = {
@@ -18,3 +20,13 @@ export type AssetResponse = {
 };
 
 export type AssetsResponse = AssetResponse[];
+
+export type AssetSearchItem = {
+	ticker: string;
+	name: string;
+	type: AssetType;
+};
+
+export type AssetWithQuoteResponse = AssetResponse & {
+	quote?: { price: number; currency: CurrencyType };
+};
