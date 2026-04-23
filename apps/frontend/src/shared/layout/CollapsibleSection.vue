@@ -15,18 +15,14 @@
         :class="modelValue ? 'pi-chevron-up' : 'pi-chevron-down'"
       />
     </button>
-    <Transition
-      enter-active-class="transition-all duration-200 ease-out"
-      enter-from-class="opacity-0 max-h-0"
-      enter-to-class="opacity-100 max-h-[800px]"
-      leave-active-class="transition-all duration-150 ease-in"
-      leave-from-class="opacity-100 max-h-[800px]"
-      leave-to-class="opacity-0 max-h-0"
+    <div
+      class="grid pl-1 transition-[grid-template-rows] duration-200 ease-in-out motion-reduce:transition-none"
+      :style="{ gridTemplateRows: modelValue ? '1fr' : '0fr' }"
     >
-      <div v-show="modelValue" class="overflow-hidden pl-1">
+      <div class="min-h-0 overflow-hidden mt-2">
         <slot />
       </div>
-    </Transition>
+    </div>
   </div>
 </template>
 

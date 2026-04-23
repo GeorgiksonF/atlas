@@ -28,10 +28,6 @@ export const usePortfoliosStore = defineStore('portfolios', () => {
 		isPortfolioSidebarOpen.value = !isPortfolioSidebarOpen.value;
 	}
 
-	function closePortfolioSidebar() {
-		isPortfolioSidebarOpen.value = false;
-	}
-
 	function getActivePortfolio(): PortfolioResponse | null {
 		if (activePortfolioId.value === 'all') return null;
 		return portfolios.value.find((p) => p.id === activePortfolioId.value) ?? null;
@@ -51,7 +47,6 @@ export const usePortfoliosStore = defineStore('portfolios', () => {
 		deletePortfolio,
 		setActivePortfolio,
 		togglePortfolioSidebar,
-		closePortfolioSidebar,
 		getActivePortfolio,
 	};
 });

@@ -9,7 +9,9 @@
 				<main id="main-content" class="h-full w-full p-4 text-slate-300">
 					<router-view />
 				</main>
-				<PortfolioSidebar v-if="isPortfolioSidebarOpen" />
+				<Transition name="portfolio-sidebar-fade">
+					<PortfolioSidebar v-if="isPortfolioSidebarOpen" />
+				</Transition>
 			</div>
 		</div>
 
@@ -47,3 +49,15 @@ onMounted(async () => {
 	}
 });
 </script>
+
+<style scoped>
+.portfolio-sidebar-fade-enter-active,
+.portfolio-sidebar-fade-leave-active {
+	transition: opacity 0.18s ease;
+}
+
+.portfolio-sidebar-fade-enter-from,
+.portfolio-sidebar-fade-leave-to {
+	opacity: 0;
+}
+</style>

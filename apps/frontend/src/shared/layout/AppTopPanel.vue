@@ -4,7 +4,7 @@
 	>
 		<button
 			type="button"
-			class="account-card flex items-center gap-3 rounded-lg border border-slate-600 bg-slate-600/50 px-4 py-2.5 text-left transition-colors hover:border-slate-500 hover:bg-slate-600"
+			class="portfolio-sidebar-trigger account-card flex items-center gap-3 rounded-lg border border-slate-600 bg-slate-600/50 px-4 py-2.5 text-left transition-colors hover:border-slate-500 hover:bg-slate-600"
 			@click="portfoliosStore.togglePortfolioSidebar()"
 		>
 			<i class="pi pi-wallet text-slate-300" />

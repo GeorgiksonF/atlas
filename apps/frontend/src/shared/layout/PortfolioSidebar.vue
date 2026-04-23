@@ -1,5 +1,6 @@
 <template>
 	<aside
+		ref="asideRoot"
 		class="absolute left-0 top-0 bottom-0 z-10 flex w-90 flex-col border-r border-slate-600 bg-slate-900"
 	>
 		<div class="flex flex-col gap-1 overflow-y-auto p-3">
@@ -25,6 +26,9 @@
 						:subtitle="getPortfolioCategoryLabel(p.category)"
 						:value="'1 000 000 000 ₽'"
 						:active="activePortfolioId === p.id"
+						:actions-pinned="
+							isPortfolioMenuOpen && menuPortfolioContext?.id === p.id
+						"
 						@click="selectPortfolio(p.id)"
 					>
 						<template #actions>
@@ -45,7 +49,13 @@
 			<AddPortfolioButton />
 		</div>
 
-		<Menu ref="portfolioMenuRef" :model="portfolioMenuItems" :popup="true" />
+		<Menu
+			ref="portfolioMenuRef"
+			:model="portfolioMenuItems"
+			:popup="true"
+			@show="onPortfolioMenuShow"
+			@hide="onPortfolioMenuHide"
+		/>
 	</aside>
 </template>
 
@@ -56,6 +66,7 @@ import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore
 import AddPortfolioButton from '@/shared/layout/AddPortfolioButton.vue';
 import CollapsibleSection from '@/shared/layout/CollapsibleSection.vue';
 import PortfolioCard from '@/shared/layout/PortfolioCard.vue';
+import { onClickOutside } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 import { ref, computed } from 'vue';
 
@@ -65,6 +76,16 @@ const { portfolios, activePortfolioId } = storeToRefs(portfoliosStore);
 const isInvestmentsExpanded = ref(true);
 const portfolioMenuRef = ref<{ toggle: (e: Event) => void } | null>(null);
 const menuPortfolioContext = ref<PortfolioResponse | null>(null);
+const isPortfolioMenuOpen = ref(false);
+const asideRoot = ref<HTMLElement | null>(null);
+
+onClickOutside(
+	asideRoot,
+	() => portfoliosStore.togglePortfolioSidebar(),
+	{
+		ignore: ['.portfolio-sidebar-trigger'],
+	},
+);
 
 const portfolioMenuItems = computed(() => [
 	{ label: 'Редактировать', icon: 'pi pi-pencil' },
@@ -73,11 +94,19 @@ const portfolioMenuItems = computed(() => [
 
 function selectPortfolio(id: string | 'all') {
 	portfoliosStore.setActivePortfolio(id);
-	portfoliosStore.closePortfolioSidebar();
+	portfoliosStore.togglePortfolioSidebar();
 }
 
 function openPortfolioMenu(e: Event, portfolio: PortfolioResponse) {
 	menuPortfolioContext.value = portfolio;
 	portfolioMenuRef.value?.toggle(e);
+}
+
+function onPortfolioMenuShow() {
+	isPortfolioMenuOpen.value = true;
+}
+
+function onPortfolioMenuHide() {
+	isPortfolioMenuOpen.value = false;
 }
 </script>
