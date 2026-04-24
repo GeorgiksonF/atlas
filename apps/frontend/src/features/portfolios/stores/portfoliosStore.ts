@@ -36,6 +36,9 @@ export const usePortfoliosStore = defineStore('portfolios', () => {
 	async function deletePortfolio(id: string): Promise<void> {
 		await portfoliosRepository.delete(id);
 		portfolios.value = portfolios.value.filter((p) => p.id !== id);
+		if (activePortfolioId.value === id) {
+			activePortfolioId.value = 'all';
+		}
 	}
 
 	return {

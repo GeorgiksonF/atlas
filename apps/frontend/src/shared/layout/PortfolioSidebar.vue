@@ -62,16 +62,28 @@
 <script setup lang="ts">
 import type { PortfolioResponse } from '@atlas/types';
 import { getPortfolioCategoryLabel } from '@/features/portfolios/constants/categories';
+import { usePortfolioDeleteConfirm } from '@/features/portfolios/composables/usePortfolioDeleteConfirm';
 import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
 import AddPortfolioButton from '@/shared/layout/AddPortfolioButton.vue';
 import CollapsibleSection from '@/shared/layout/CollapsibleSection.vue';
 import PortfolioCard from '@/shared/layout/PortfolioCard.vue';
 import { onClickOutside } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const portfoliosStore = usePortfoliosStore();
-const { portfolios, activePortfolioId } = storeToRefs(portfoliosStore);
+const { portfolios, activePortfolioId, isPortfolioSidebarOpen } =
+	storeToRefs(portfoliosStore);
+
+const { confirmDeletePortfolio } = usePortfolioDeleteConfirm({
+	afterSuccess: () => {
+		if (isPortfolioSidebarOpen.value) {
+			portfoliosStore.togglePortfolioSidebar();
+		}
+	},
+});
 
 const isInvestmentsExpanded = ref(true);
 const portfolioMenuRef = ref<{ toggle: (e: Event) => void } | null>(null);
@@ -83,13 +95,27 @@ onClickOutside(
 	asideRoot,
 	() => portfoliosStore.togglePortfolioSidebar(),
 	{
-		ignore: ['.portfolio-sidebar-trigger'],
+		ignore: ['.portfolio-sidebar-trigger', '[data-pc-name="menu"]'],
 	},
 );
 
 const portfolioMenuItems = computed(() => [
-	{ label: 'Редактировать', icon: 'pi pi-pencil' },
-	{ label: 'Удалить', icon: 'pi pi-trash' },
+	{
+		label: 'Редактировать',
+		icon: 'pi pi-pencil',
+		disabled: !menuPortfolioContext.value,
+		command: () => {
+			const p = menuPortfolioContext.value;
+			if (!p) return;
+			router.push({ name: 'editPortfolio', params: { id: p.id } });
+		},
+	},
+	{
+		label: 'Удалить',
+		icon: 'pi pi-trash',
+		disabled: !menuPortfolioContext.value,
+		command: () => confirmDeletePortfolio(menuPortfolioContext.value),
+	},
 ]);
 
 function selectPortfolio(id: string | 'all') {
