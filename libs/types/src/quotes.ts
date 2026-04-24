@@ -1,4 +1,4 @@
-export type CurrencyType = 'RUB';
+export type CurrencyType = 'RUB' | 'USD';
 
 export type QuoteResponse = {
 	id: string;

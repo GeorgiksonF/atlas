@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import path from 'node:path';
 import { AssetsModule } from './assets/assets.module';
 import { QuotesModule } from './quotes/quotes.module';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { QuotesModule } from './quotes/quotes.module';
 		PortfoliosModule,
 		AssetsModule,
 		QuotesModule,
+		TransactionsModule,
 	],
 	controllers: [],
 	providers: [],

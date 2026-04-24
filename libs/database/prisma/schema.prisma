@@ -62,13 +62,14 @@ model Transactions {
   price Decimal @db.Decimal(12, 2)
   type TransactionType
   date DateTime
+  currency CurrencyType @default(RUB)
   createdAt DateTime @default(now())
 
   portfolioId String
   portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
-  assetId String
-  asset Asset @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  assetId String?
+  asset Asset? @relation(fields: [assetId], references: [id], onDelete: Restrict)
 
   @@map("transactions")
 }
@@ -94,8 +95,11 @@ enum AssetType {
 enum TransactionType {
   BUY
   SELL
+  DEPOSIT
+  WITHDRAWAL
 }
 
 enum CurrencyType {
   RUB
+  USD
 }

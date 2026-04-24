@@ -87,18 +87,16 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import type { PortfolioCategory, PortfolioResponse } from '@atlas/types';
+import { usePortfolioDeleteConfirm } from '@/features/portfolios/composables/usePortfolioDeleteConfirm';
 import { getPortfolioCategoryLabel } from '@/features/portfolios/constants/categories';
 import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
 import ManagementCategorySection from '@/shared/components/ManagementCategorySection.vue';
 import PortfolioCardRow from '@/shared/components/PortfolioCardRow.vue';
-import { useConfirm } from 'primevue/useconfirm';
-import { useToast } from 'primevue/usetoast';
 import { storeToRefs } from 'pinia';
 
 const router = useRouter();
-const toast = useToast();
-const confirm = useConfirm();
 const portfoliosStore = usePortfoliosStore();
+const { confirmDeletePortfolio } = usePortfolioDeleteConfirm();
 const { portfolios, loading } = storeToRefs(portfoliosStore);
 
 const searchQuery = ref('');
@@ -152,7 +150,7 @@ const menuItems = computed(() => [
 		label: 'Удалить',
 		icon: 'pi pi-trash',
 		disabled: !menuPortfolioContext.value,
-		command: () => openDeleteConfirm(menuPortfolioContext.value),
+		command: () => confirmDeletePortfolio(menuPortfolioContext.value),
 	},
 ]);
 
@@ -168,34 +166,6 @@ function goToEdit(portfolio: PortfolioResponse) {
 function openMenu(e: Event, portfolio: PortfolioResponse | null) {
 	menuPortfolioContext.value = portfolio;
 	menuRef.value?.toggle(e);
-}
-
-function openDeleteConfirm(portfolio: PortfolioResponse | null) {
-	if (!portfolio) return;
-	confirm.require({
-		header: 'Удаление портфеля',
-		message: `Удалить портфель портфель ${portfolio.name}? Это действие нельзя отменить`,
-		rejectLabel: 'Отмена',
-		acceptLabel: 'Удалить',
-		rejectClass: 'p-button-secondary',
-		acceptClass: 'p-button-danger',
-		accept: async () => {
-			try {
-				await portfoliosStore.deletePortfolio(portfolio.id);
-				toast.add({
-					severity: 'success',
-					summary: 'Портфель удалён',
-					life: 3000,
-				});
-			} catch {
-				toast.add({
-					severity: 'error',
-					summary: 'Не удалось удалить портфель',
-					life: 5000,
-				});
-			}
-		},
-	});
 }
 
 onMounted(() => {

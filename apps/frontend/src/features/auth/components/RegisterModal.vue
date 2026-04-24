@@ -1,14 +1,10 @@
 <template>
-	<Dialog
+	<AppDialog
 		v-model:visible="isOpen"
-		class="bg-slate-800! w-1/5"
-		modal
-		:draggable="false"
+		class="w-1/5"
+		title="Регистрация"
 		@after-hide="resetForm"
 	>
-		<template #header>
-			<h2>Регистрация</h2>
-		</template>
 		<form id="register-form" class="flex flex-col gap-4 w-full pt-4" @submit.prevent="onSubmit">
 			<div class="flex flex-col gap-1 w-full">
 				<InputGroup class="w-full">
@@ -113,11 +109,12 @@
 				Отмена
 			</Button>
 		</template>
-	</Dialog>
+	</AppDialog>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import AppDialog from '@/shared/components/AppDialog.vue';
 import { useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';

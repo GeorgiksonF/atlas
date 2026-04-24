@@ -1,6 +1,6 @@
 <template>
   <div
-    class="portfolio-card group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5"
+    class="portfolio-card group relative flex w-full items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5"
     :class="
       active
         ? 'bg-slate-600 text-slate-100'
@@ -27,9 +27,17 @@
     </button>
     <div
       v-if="$slots.actions"
-      class="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+      class="flex shrink-0 items-center overflow-hidden transition-[width] duration-200 ease-out"
+      :class="actionsPinned ? 'w-10' : 'w-0 group-hover:w-10'"
     >
-      <slot name="actions" />
+      <div
+        class="flex w-10 shrink-0 justify-end transition-transform duration-200 ease-out"
+        :class="
+          actionsPinned ? 'translate-x-0' : 'translate-x-full group-hover:translate-x-0'
+        "
+      >
+        <slot name="actions" />
+      </div>
     </div>
   </div>
 </template>
@@ -41,6 +49,7 @@ defineProps<{
   subtitle?: string;
   value?: string;
   active: boolean;
+  actionsPinned?: boolean;
 }>();
 
 defineEmits<{

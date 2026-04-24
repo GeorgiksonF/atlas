@@ -46,7 +46,7 @@
 					<span v-show="isOpen" class="text-sm font-medium">Действия</span>
 				</Transition>
 			</Button>
-			<Menu id="actions-menu" ref="menu" :model="quickActions" :popup="true" />
+			<Menu id="actions-menu" ref="menu" :model="props.quickActions" :popup="true" />
 		</div>
 		<nav class="mt-6 flex flex-1 flex-col gap-2 px-2">
 			<RouterLink
@@ -67,21 +67,22 @@
 </template>
 
 <script setup lang="ts">
+import type { MenuItem } from 'primevue/menuitem';
 import { ref } from 'vue';
 
+const props = withDefaults(
+	defineProps<{
+		quickActions?: MenuItem[];
+	}>(),
+	{ quickActions: () => [] },
+);
+
 const isOpen = ref(true);
-const quickActions = ref([
-	{
-		label: 'Добавить сделку',
-	},
-	{
-		label: 'Добавить актив',
-	},
-]);
 const menu = ref();
-const toggleQuickActionsMenu = (e: Event) => {
+
+function toggleQuickActionsMenu(e: Event) {
 	menu.value.toggle(e);
-};
+}
 
 const navbarItems = ref([
 	{
