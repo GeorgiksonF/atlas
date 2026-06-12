@@ -7,11 +7,12 @@ import { PrismaClient } from '@atlas/database';
 import type {
 	AssetResponse,
 	AssetsResponse,
+	AssetWithQuoteResponse,
 	CreateAsset,
 	UpdateAsset,
 } from '@atlas/types';
 import { ASSET_ERROR_MESSAGES } from './constants/messages';
-
+import { assetWithQuotesToResponse } from './utils/adapters';
 @Injectable()
 export class AssetsService {
 	constructor(private readonly prisma: PrismaClient) {}
@@ -30,6 +31,39 @@ export class AssetsService {
 			throw new NotFoundException(ASSET_ERROR_MESSAGES.ASSET_NOT_FOUND);
 		}
 		return asset;
+	}
+
+	async findByIdsWithQuotes(
+		ids: string[],
+	): Promise<AssetWithQuoteResponse[]> {
+		if (!ids.length) return [];
+
+		const response = await this.prisma.asset.findMany({
+			where: {
+				id: {
+					in: ids,
+				},
+			},
+			include: { quote: true },
+		});
+
+		if (!response.length) {
+			return [];
+		}
+
+		return response.map(assetWithQuotesToResponse);
+	}
+
+	async findAllWithQuotes(): Promise<AssetWithQuoteResponse[]> {
+		const response = await this.prisma.asset.findMany({
+			include: { quote: true },
+		});
+
+		if (!response.length) {
+			return [];
+		}
+
+		return response.map(assetWithQuotesToResponse);
 	}
 
 	async findByTicker(ticker: string): Promise<AssetResponse | null> {

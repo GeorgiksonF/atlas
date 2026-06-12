@@ -1,3 +1,5 @@
+import type { TransactionResponse } from './transactions';
+
 export type PortfolioCategory = 'INVESTMENTS' | 'CRYPTO';
 
 export type CreatePortfolio = {
@@ -26,3 +28,7 @@ export type PortfolioResponse = {
 };
 
 export type PortfoliosResponse = PortfolioResponse[];
+
+export type PortfolioWithTransactionsResponse = PortfolioResponse & {
+	transactions: TransactionResponse[]
+}

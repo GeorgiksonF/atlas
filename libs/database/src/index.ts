@@ -7,4 +7,4 @@ export function createPrismaClient(connectionString: string): PrismaClient {
 }
 
 export { PrismaClient, Prisma } from '../generated/prisma/client.js';
-export type { User, Portfolio, Asset, Transactions } from '../generated/prisma/client.js';
+export type { User, Portfolio, Asset, Transaction } from '../generated/prisma/client.js';

@@ -1,6 +1,7 @@
 import { apiClient } from '@/shared/api/client';
 import type {
 	CreatePortfolio,
+	PortfolioSummaryResponse,
 	PortfolioResponse,
 	PortfoliosResponse,
 	UpdatePortfolio,
@@ -19,6 +20,17 @@ export const portfoliosRepository = {
 
 	async getById(id: string): Promise<PortfolioResponse> {
 		const { data } = await apiClient.get<PortfolioResponse>(`/portfolios/${id}`);
+		return data;
+	},
+
+	async getSummary(
+		portfolioId: string | 'all',
+	): Promise<PortfolioSummaryResponse> {
+		const url =
+			portfolioId === 'all'
+				? '/portfolios/summary/all'
+				: `/portfolios/${portfolioId}/summary`;
+		const { data } = await apiClient.get<PortfolioSummaryResponse>(url);
 		return data;
 	},
 

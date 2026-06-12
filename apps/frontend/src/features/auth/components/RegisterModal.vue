@@ -118,7 +118,7 @@ import AppDialog from '@/shared/components/AppDialog.vue';
 import { useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
-import { useToast } from 'primevue/usetoast';
+import { useAppToast } from '@utils';
 import { getErrorMessage } from '@/shared/api/errorMessage';
 import { authRepository } from '../api/authRepository';
 import { useAuthStore } from '../stores/authStore';
@@ -126,7 +126,7 @@ import { register } from '../constants/messages';
 import { registerSchema, type RegisterFormValues } from '../schemas/registerSchema';
 
 const router = useRouter();
-const toast = useToast();
+const toast = useAppToast();
 
 const props = defineProps<{
 	registerDialog: boolean;
@@ -211,23 +211,13 @@ async function onRegister(values: {
 		const response = await authRepository.register(values);
 		authStore.setToken(response.token);
 		authStore.setUser(response.user);
-		toast.add({
-			severity: 'success',
-			summary: register.toastSuccessSummary,
-			detail: register.toastSuccessDetail,
-			life: 3000,
-		});
+		toast.success(register.toastSuccessSummary);
 		close();
 		await router.push({ name: 'portfolio' });
 	} catch (err: unknown) {
 		const errorText = getErrorMessage(err, register.errorFallback);
 		submitError.value = errorText;
-		toast.add({
-			severity: 'error',
-			summary: register.toastErrorSummary,
-			detail: errorText,
-			life: 5000,
-		});
+		toast.error(register.toastErrorSummary);
 	} finally {
 		loading.value = false;
 	}

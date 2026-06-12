@@ -3,7 +3,7 @@ import {
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common';
-import { Prisma, PrismaClient } from '@atlas/database';
+import { PrismaClient, Transaction } from '@atlas/database';
 import type {
 	CreateTransaction,
 	TransactionResponse,
@@ -14,30 +14,12 @@ import { TRANSACTION_ERROR_MESSAGES } from './constants/messages';
 import { PortfoliosService } from '../portfolios/portfolios.service';
 import { AssetsService } from '../assets/assets.service';
 
-function toResponse(row: {
-	id: string;
-	quantity: number;
-	price: unknown;
-	type: string;
-	date: Date;
-	currency: string;
-	createdAt: Date;
-	portfolioId: string;
-	assetId: string | null;
-}): TransactionResponse {
-	return {
-		id: row.id,
-		quantity: row.quantity,
-		price: Number(row.price),
-		type: row.type as TransactionResponse['type'],
-		date: row.date,
-		currency: row.currency as TransactionResponse['currency'],
-		createdAt: row.createdAt,
-		portfolioId: row.portfolioId,
-		assetId: row.assetId,
-	};
-}
-
+export const transctionToResponse = (
+	row: Transaction,
+): TransactionResponse => ({
+	...row,
+	price: Number(row.price),
+});
 @Injectable()
 export class TransactionsService {
 	constructor(
@@ -55,6 +37,7 @@ export class TransactionsService {
 				TRANSACTION_ERROR_MESSAGES.USER_ID_REQUIRED,
 			);
 		}
+
 		await this.portfoliosService.findById(portfolioId, userId);
 	}
 
@@ -63,11 +46,12 @@ export class TransactionsService {
 		userId: string,
 	): Promise<TransactionsResponse> {
 		await this.ensurePortfolioAccess(portfolioId, userId);
-		const rows = await this.prisma.transactions.findMany({
+
+		const rows = await this.prisma.transaction.findMany({
 			where: { portfolioId },
 			orderBy: { date: 'desc' },
 		});
-		return rows.map(toResponse);
+		return rows.map(transctionToResponse);
 	}
 
 	async findById(
@@ -76,15 +60,17 @@ export class TransactionsService {
 		userId: string,
 	): Promise<TransactionResponse> {
 		await this.ensurePortfolioAccess(portfolioId, userId);
-		const row = await this.prisma.transactions.findFirst({
+
+		const row = await this.prisma.transaction.findFirst({
 			where: { id: transactionId, portfolioId },
 		});
+
 		if (!row) {
 			throw new NotFoundException(
 				TRANSACTION_ERROR_MESSAGES.TRANSACTION_NOT_FOUND,
 			);
 		}
-		return toResponse(row);
+		return transctionToResponse(row);
 	}
 
 	async create(
@@ -103,6 +89,7 @@ export class TransactionsService {
 					TRANSACTION_ERROR_MESSAGES.ASSET_REQUIRED_FOR_TRADE,
 				);
 			}
+
 			await this.assetsService.findById(dto.assetId);
 		}
 
@@ -115,18 +102,19 @@ export class TransactionsService {
 		}
 
 		const quantity = isCash ? 1 : dto.quantity;
-		const data: Prisma.TransactionsUncheckedCreateInput = {
+
+		const data = {
 			portfolioId,
 			assetId: isCash ? null : (dto.assetId ?? null),
 			quantity,
 			price: dto.price,
-			type: dto.type as Prisma.TransactionsUncheckedCreateInput['type'],
+			type: dto.type,
 			date: new Date(dto.date),
 			currency: dto.currency,
 		};
 
-		const row = await this.prisma.transactions.create({ data });
-		return toResponse(row);
+		const row = await this.prisma.transaction.create({ data });
+		return transctionToResponse(row);
 	}
 
 	async update(
@@ -136,9 +124,11 @@ export class TransactionsService {
 		dto: UpdateTransaction,
 	): Promise<TransactionResponse> {
 		await this.ensurePortfolioAccess(portfolioId, userId);
-		const existing = await this.prisma.transactions.findFirst({
+
+		const existing = await this.prisma.transaction.findFirst({
 			where: { id: transactionId, portfolioId },
 		});
+
 		if (!existing) {
 			throw new NotFoundException(
 				TRANSACTION_ERROR_MESSAGES.TRANSACTION_NOT_FOUND,
@@ -155,33 +145,33 @@ export class TransactionsService {
 					TRANSACTION_ERROR_MESSAGES.ASSET_REQUIRED_FOR_TRADE,
 				);
 			}
+
 			if (isCash(type) && dto.assetId != null && dto.assetId !== '') {
 				throw new BadRequestException(
 					TRANSACTION_ERROR_MESSAGES.ASSET_FORBIDDEN_FOR_CASH,
 				);
 			}
+
 			if (isTrade(type) && dto.assetId) {
 				await this.assetsService.findById(dto.assetId);
 			}
 		}
 
-		const data: Prisma.TransactionsUncheckedUpdateInput = {};
-		if (dto.assetId !== undefined)
-			data.assetId = isCash(type) ? null : (dto.assetId ?? null);
-		if (dto.quantity !== undefined)
-			data.quantity = isCash(type) ? 1 : dto.quantity;
-		if (dto.price !== undefined) data.price = dto.price;
-		if (dto.type !== undefined)
-			data.type =
-				dto.type as Prisma.TransactionsUncheckedUpdateInput['type'];
-		if (dto.date !== undefined) data.date = new Date(dto.date);
-		if (dto.currency !== undefined) data.currency = dto.currency;
+		const data: UpdateTransaction = {
+			assetId: dto.assetId ?? undefined,
+			quantity: dto.quantity,
+			price: dto.price,
+			type: dto.type,
+			date: dto.date ? new Date(dto.date).toISOString() : undefined,
+			currency: dto.currency,
+		};
 
-		const row = await this.prisma.transactions.update({
+		const row = await this.prisma.transaction.update({
 			where: { id: transactionId },
 			data,
 		});
-		return toResponse(row);
+
+		return transctionToResponse(row);
 	}
 
 	async delete(
@@ -190,14 +180,17 @@ export class TransactionsService {
 		userId: string,
 	): Promise<void> {
 		await this.ensurePortfolioAccess(portfolioId, userId);
-		const existing = await this.prisma.transactions.findFirst({
+
+		const existing = await this.prisma.transaction.findFirst({
 			where: { id: transactionId, portfolioId },
 		});
+
 		if (!existing) {
 			throw new NotFoundException(
 				TRANSACTION_ERROR_MESSAGES.TRANSACTION_NOT_FOUND,
 			);
 		}
-		await this.prisma.transactions.delete({ where: { id: transactionId } });
+
+		await this.prisma.transaction.delete({ where: { id: transactionId } });
 	}
 }

@@ -1,16 +1,7 @@
-import {
-	computed,
-	getCurrentScope,
-	onScopeDispose,
-	ref,
-	watch,
-} from 'vue';
+import { computed, getCurrentScope, onScopeDispose, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
+import { useAppToast } from '@utils';
 import { getErrorMessage } from '@/shared/api/errorMessage';
-import { portfoliosRepository } from '@/features/portfolios/api/portfoliosRepository';
-import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
-import { PORTFOLIO_CATEGORY_LABELS } from '@/features/portfolios/constants/categories';
 import type { PortfolioCategory } from '@atlas/types';
 import {
 	STEPS,
@@ -20,16 +11,15 @@ import {
 	clampStepPrev,
 	getDefaultName,
 	validatePortfolioName,
-} from '@/features/portfolios/utils/createPortfolioValidation';
-
-const CATEGORIES: { value: PortfolioCategory; label: string }[] = Object.entries(
-	PORTFOLIO_CATEGORY_LABELS,
-).map(([value, label]) => ({ value: value as PortfolioCategory, label }));
+	usePortfoliosStore,
+	portfoliosRepository,
+	PORTFOLIO_CATEGORIES
+} from '@features/portfolios';
 
 export function useCreatePortfolio() {
 	const router = useRouter();
-	const toast = useToast();
-	const portfoliosStore = usePortfoliosStore();
+	const toast = useAppToast();
+	const store = usePortfoliosStore();
 
 	const scope = getCurrentScope();
 	const cancelled = ref(false);
@@ -51,17 +41,10 @@ export function useCreatePortfolio() {
 
 	const nameError = computed(() => validatePortfolioName(name.value));
 
-	const canProceed = computed(() =>
-		canProceedToNext(step.value, category.value, broker.value),
-	);
+	const canProceed = computed(() => canProceedToNext(step.value, category.value, broker.value));
 
 	const canSubmit = computed(() =>
-		canSubmitForm(
-			nameError.value,
-			name.value.trim(),
-			category.value,
-			broker.value,
-		),
+		canSubmitForm(nameError.value, name.value.trim(), category.value, broker.value),
 	);
 
 	function applyDefaultNameFromBroker(): void {
@@ -98,23 +81,14 @@ export function useCreatePortfolio() {
 				broker: broker.value || undefined,
 			});
 			if (cancelled.value) return;
-			await portfoliosStore.fetchPortfolios();
+			await store.fetchPortfolios();
 			if (cancelled.value) return;
-			toast.add({
-				severity: 'success',
-				summary: 'Портфель создан',
-				life: 3000,
-			});
+			toast.success('Портфель создан');
 			await router.push({ name: 'portfolio' });
 		} catch (err: unknown) {
 			if (cancelled.value) return;
 			submitError.value = getErrorMessage(err, 'Не удалось создать портфель');
-			toast.add({
-				severity: 'error',
-				summary: 'Ошибка',
-				detail: submitError.value,
-				life: 5000,
-			});
+			toast.error('Ошибка');
 		} finally {
 			loading.value = false;
 		}
@@ -139,7 +113,7 @@ export function useCreatePortfolio() {
 		brokersError,
 		loading,
 		submitError,
-		categories: CATEGORIES,
+		categories: PORTFOLIO_CATEGORIES,
 		nameError,
 		canProceed,
 		canSubmit,

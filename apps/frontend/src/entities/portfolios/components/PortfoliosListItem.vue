@@ -1,0 +1,81 @@
+<template>
+	<div
+		class="cursor-pointer group relative flex w-full items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5"
+		:class="active ? 'bg-slate-600 text-slate-100' : 'text-slate-200 hover:bg-slate-700'"
+	>
+		<div
+			type="button"
+			class="flex min-w-0 flex-1 items-center gap-3 text-left"
+			@click="$emit('click')"
+		>
+			<i :class="icon" class="shrink-0 text-slate-400" />
+			<div class="min-w-0 flex-1">
+				<div class="truncate text-sm font-medium">
+					{{ portfolio.name }}
+				</div>
+				<div v-if="portfolio.category" class="text-xs text-slate-400">
+					{{ portfolio.category }}
+				</div>
+			</div>
+			<span class="shrink-0 text-xs text-slate-400"> 1000$ </span>
+		</div>
+		<div
+			class="flex shrink-0 items-center overflow-hidden transition-[width] duration-200 ease-out"
+			:class="actionsPinned ? 'w-10' : 'w-0 group-hover:w-10'"
+		>
+			<div
+				class="flex w-10 shrink-0 justify-end transition-transform duration-200 ease-out"
+				:class="
+					actionsPinned ? 'translate-x-0' : 'translate-x-full group-hover:translate-x-0'
+				"
+			>
+				<div v-if="portfolioMenuItems.length" class="flex shrink-0 items-center pr-2">
+					<Button
+						icon="pi pi-ellipsis-v"
+						text
+						rounded
+						size="small"
+						aria-label="Действия со счётом"
+						@click="menuRef?.toggle($event)"
+					/>
+				</div>
+			</div>
+			<Menu ref="menuRef" :model="portfolioMenuItems" :popup="true" />
+		</div>
+	</div>
+</template>
+
+<script setup lang="ts">
+import {
+	usePortfolioMenuItems,
+	usePortfolioDeleteConfirm,
+	usePortfoliosStore,
+	PortfolioContext,
+} from '@features/portfolios';
+import { ref } from 'vue';
+
+const store = usePortfoliosStore();
+const { confirmDeletePortfolio } = usePortfolioDeleteConfirm({
+	afterSuccess: () => {
+		if (store.isPortfolioSidebarOpen) {
+			store.togglePortfolioSidebar();
+		}
+	},
+});
+
+const menuRef = ref<{ toggle: (e: Event) => void } | null>(null);
+
+const portfolioMenuItems = usePortfolioMenuItems(store.activePortfolio, confirmDeletePortfolio);
+
+defineProps<{
+	icon: string;
+	value?: string;
+	portfolio: PortfolioContext;
+	active: boolean;
+	actionsPinned?: boolean;
+}>();
+
+defineEmits<{
+	click: [];
+}>();
+</script>

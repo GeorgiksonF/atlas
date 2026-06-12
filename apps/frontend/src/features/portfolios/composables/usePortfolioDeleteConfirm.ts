@@ -1,20 +1,17 @@
-import type { PortfolioResponse } from '@atlas/types';
-import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
+import { PortfolioContext, usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
 import { useConfirm } from 'primevue/useconfirm';
-import { useToast } from 'primevue/usetoast';
+import { useAppToast } from '@utils';
 
 export type UsePortfolioDeleteConfirmOptions = {
 	afterSuccess?: () => void;
 };
 
-export function usePortfolioDeleteConfirm(options?: UsePortfolioDeleteConfirmOptions) {
+export const usePortfolioDeleteConfirm = (options?: UsePortfolioDeleteConfirmOptions) => {
 	const confirm = useConfirm();
-	const toast = useToast();
-	const portfoliosStore = usePortfoliosStore();
+	const toast = useAppToast();
+	const store = usePortfoliosStore();
 
-	function confirmDeletePortfolio(portfolio: PortfolioResponse | null): void {
-		if (!portfolio) return;
-
+	function confirmDeletePortfolio(portfolio: PortfolioContext): void {
 		confirm.require({
 			header: 'Удаление портфеля',
 			message: `Удалить портфель «${portfolio.name}»? Это действие нельзя отменить.`,
@@ -24,23 +21,15 @@ export function usePortfolioDeleteConfirm(options?: UsePortfolioDeleteConfirmOpt
 			acceptClass: 'p-button-danger',
 			accept: async () => {
 				try {
-					await portfoliosStore.deletePortfolio(portfolio.id);
-					toast.add({
-						severity: 'success',
-						summary: 'Портфель удалён',
-						life: 3000,
-					});
+					await store.deletePortfolio(portfolio.id);
+					toast.success('Портфель удалён');
 					options?.afterSuccess?.();
 				} catch {
-					toast.add({
-						severity: 'error',
-						summary: 'Не удалось удалить портфель',
-						life: 5000,
-					});
+					toast.error('Не удалось удалить портфель');
 				}
 			},
 		});
 	}
 
 	return { confirmDeletePortfolio };
-}
+};

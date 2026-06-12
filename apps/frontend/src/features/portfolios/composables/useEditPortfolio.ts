@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
+import { useAppToast } from '@utils';
 import { getErrorMessage } from '@/shared/api/errorMessage';
 import { portfoliosRepository } from '@/features/portfolios/api/portfoliosRepository';
 import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
@@ -15,8 +15,8 @@ const CATEGORIES: { value: PortfolioCategory; label: string }[] = Object.entries
 export function useEditPortfolio() {
 	const route = useRoute();
 	const router = useRouter();
-	const toast = useToast();
-	const portfoliosStore = usePortfoliosStore();
+	const toast = useAppToast();
+	const store = usePortfoliosStore();
 
 	const portfolioId = computed(() => route.params.id as string);
 
@@ -34,9 +34,7 @@ export function useEditPortfolio() {
 
 	const nameError = computed(() => validatePortfolioName(name.value));
 
-	const brokerOptions = computed(() =>
-		brokers.value.map((b) => ({ value: b, label: b })),
-	);
+	const brokerOptions = computed(() => brokers.value.map((b) => ({ value: b, label: b })));
 
 	const canSave = computed(
 		() =>
@@ -62,12 +60,7 @@ export function useEditPortfolio() {
 			applyPortfolio(p);
 		} catch (err: unknown) {
 			portfolioError.value = getErrorMessage(err, 'Не удалось загрузить портфель');
-			toast.add({
-				severity: 'error',
-				summary: 'Ошибка',
-				detail: portfolioError.value,
-				life: 5000,
-			});
+			toast.error('Ошибка');
 		} finally {
 			portfolioLoading.value = false;
 		}
@@ -98,21 +91,12 @@ export function useEditPortfolio() {
 				category: category.value!,
 				broker: broker.value || undefined,
 			});
-			await portfoliosStore.fetchPortfolios();
-			toast.add({
-				severity: 'success',
-				summary: 'Портфель обновлён',
-				life: 3000,
-			});
+			await store.fetchPortfolios();
+			toast.success('Портфель обновлён');
 			await router.push({ name: 'portfolioManagement' });
 		} catch (err: unknown) {
 			submitError.value = getErrorMessage(err, 'Не удалось сохранить изменения');
-			toast.add({
-				severity: 'error',
-				summary: 'Ошибка',
-				detail: submitError.value,
-				life: 5000,
-			});
+			toast.error('Ошибка');
 		} finally {
 			saving.value = false;
 		}
