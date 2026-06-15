@@ -116,8 +116,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useToast } from 'primevue/usetoast';
+import { useAppToast } from '@utils';
 import { CURRENCY_LABELS, CURRENCY_TYPES } from '../constants/currency';
 import {
 	isTradeTransactionType,
@@ -174,14 +173,13 @@ const {
 	submitError,
 });
 
-const toast = useToast();
-const portfoliosStore = usePortfoliosStore();
-const { activePortfolioId, portfolios } = storeToRefs(portfoliosStore);
+const toast = useAppToast();
+const store = usePortfoliosStore();
 
 const currentPortfolioId = computed(() => {
-	const id = activePortfolioId.value;
+	const id = store.activePortfolio.id;
 	if (id && id !== 'all') return id;
-	return portfolios.value[0]?.id ?? null;
+	return store.portfolios[0].id ?? null;
 });
 
 const typeOptions = computed(() =>
@@ -217,11 +215,7 @@ const onSubmit = handleSubmit(async (formValues) => {
 			currentPortfolioId.value,
 			createTransactionPayload(formValues),
 		);
-		toast.add({
-			severity: 'success',
-			summary: 'Сделка добавлена',
-			life: 3000,
-		});
+		toast.success('Сделка добавлена');
 		visible.value = false;
 	} catch (err: unknown) {
 		submitError.value = getErrorMessage(err, 'Не удалось добавить сделку');

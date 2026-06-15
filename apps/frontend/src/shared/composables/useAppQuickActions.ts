@@ -1,5 +1,5 @@
 import type { MenuItem } from 'primevue/menuitem';
-import { useToast } from 'primevue/usetoast';
+import { useAppToast } from '@utils';
 import { useRouter } from 'vue-router';
 import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
 import { useAddTransactionModalStore } from '@/features/transactions/stores/addTransactionModalStore';
@@ -7,8 +7,8 @@ import { useAddTransactionModalStore } from '@/features/transactions/stores/addT
 export function useAppQuickActions(): { quickActions: MenuItem[] } {
 	const router = useRouter();
 	const addTransactionModalStore = useAddTransactionModalStore();
-	const portfoliosStore = usePortfoliosStore();
-	const toast = useToast();
+	const store = usePortfoliosStore();
+	const toast = useAppToast();
 
 	const quickActions: MenuItem[] = [
 		{
@@ -18,8 +18,8 @@ export function useAppQuickActions(): { quickActions: MenuItem[] } {
 		{
 			label: 'Добавить портфель',
 			command: () => {
-				if (portfoliosStore.isPortfolioSidebarOpen) {
-					portfoliosStore.togglePortfolioSidebar();
+				if (store.isPortfolioSidebarOpen) {
+					store.togglePortfolioSidebar();
 				}
 				void router.push({ name: 'createPortfolio' });
 			},
@@ -27,9 +27,7 @@ export function useAppQuickActions(): { quickActions: MenuItem[] } {
 		{
 			label: 'Добавить актив',
 			command: () => {
-				toast.add({
-					severity: 'info',
-					summary: 'Скоро',
+				toast.info('Скоро', {
 					detail: 'Добавление актива из этого меню пока в разработке.',
 					life: 4000,
 				});

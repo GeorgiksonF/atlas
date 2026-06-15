@@ -105,7 +105,7 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
-import { useToast } from 'primevue/usetoast';
+import { useAppToast } from '@utils';
 import { getErrorMessage } from '@/shared/api/errorMessage';
 import { authRepository } from '../api/authRepository';
 import { useAuthStore } from '../stores/authStore';
@@ -113,8 +113,8 @@ import { login } from '../constants/messages';
 import { loginSchema, type LoginFormValues } from '../schemas/loginSchema';
 
 const router = useRouter();
-const toast = useToast();
 const emit = defineEmits<{ 'open-register': [] }>();
+const toast = useAppToast()
 
 const { handleSubmit } = useForm({
 	validationSchema: toTypedSchema(loginSchema),
@@ -138,26 +138,17 @@ const onSubmit = handleSubmit(onLogin);
 async function onLogin(values: LoginFormValues): Promise<void> {
 	submitError.value = '';
 	loading.value = true;
+
 	try {
 		const response = await authRepository.login(values);
 		authStore.setToken(response.access_token);
 		authStore.setUser(response.user);
-		toast.add({
-			severity: 'success',
-			summary: login.toastSuccessSummary,
-			detail: login.toastSuccessDetail,
-			life: 3000,
-		});
+		toast.success(login.toastSuccessSummary);
 		await router.push({ name: 'portfolio' });
 	} catch (err: unknown) {
 		const errorText = getErrorMessage(err, login.errorFallback);
 		submitError.value = errorText;
-		toast.add({
-			severity: 'error',
-			summary: login.toastErrorSummary,
-			detail: errorText,
-			life: 5000,
-		});
+		toast.error(login.toastErrorSummary);
 	} finally {
 		loading.value = false;
 	}

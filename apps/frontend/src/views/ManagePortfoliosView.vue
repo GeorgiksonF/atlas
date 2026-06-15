@@ -33,7 +33,7 @@
 			</PortfolioCardRow>
 		</div>
 
-		<div v-if="loading" class="flex flex-col gap-4">
+		<div v-if="store.loading" class="flex flex-col gap-4">
 			<div
 				v-for="i in 4"
 				:key="i"
@@ -53,7 +53,7 @@
 				:key="cat"
 				v-model="expandedByCategory[cat]"
 				:icon="categoryIcons[cat]"
-				:title="getPortfolioCategoryLabel(cat)"
+				:title="cat"
 				:badge="portfoliosByCategory[cat]?.length ?? 0"
 				:sum-label="categorySumLabel()"
 			>
@@ -62,7 +62,7 @@
 					:key="p.id"
 					icon="pi pi-wallet"
 					:title="p.name"
-					:subtitle="p.broker ?? undefined"
+					:subtitle="p.category"
 					@click="goToEdit(p)"
 				>
 					<template #actions>
@@ -86,22 +86,22 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import type { PortfolioCategory, PortfolioResponse } from '@atlas/types';
+import type { PortfolioCategory } from '@atlas/types';
 import { usePortfolioDeleteConfirm } from '@/features/portfolios/composables/usePortfolioDeleteConfirm';
-import { getPortfolioCategoryLabel } from '@/features/portfolios/constants/categories';
-import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
+import {
+	type PortfolioContext,
+	usePortfoliosStore,
+} from '@/features/portfolios/stores/portfoliosStore';
 import ManagementCategorySection from '@/shared/components/ManagementCategorySection.vue';
 import PortfolioCardRow from '@/shared/components/PortfolioCardRow.vue';
-import { storeToRefs } from 'pinia';
 
 const router = useRouter();
-const portfoliosStore = usePortfoliosStore();
+const store = usePortfoliosStore();
 const { confirmDeletePortfolio } = usePortfolioDeleteConfirm();
-const { portfolios, loading } = storeToRefs(portfoliosStore);
 
 const searchQuery = ref('');
 const menuRef = ref<{ toggle: (e: Event) => void } | null>(null);
-const menuPortfolioContext = ref<PortfolioResponse | null>(null);
+const menuPortfolioContext = ref<PortfolioContext | null>(null);
 
 const categoryList: PortfolioCategory[] = ['INVESTMENTS', 'CRYPTO'];
 
@@ -117,12 +117,12 @@ const expandedByCategory = ref<Record<PortfolioCategory, boolean>>({
 
 const filteredPortfolios = computed(() => {
 	const q = searchQuery.value.trim().toLowerCase();
-	if (!q) return portfolios.value;
-	return portfolios.value.filter((p) => p.name.toLowerCase().includes(q));
+	if (!q) return store.portfolios;
+	return store.portfolios.filter((p) => p.name.toLowerCase().includes(q));
 });
 
 const portfoliosByCategory = computed(() => {
-	const map: Record<PortfolioCategory, PortfolioResponse[]> = {
+	const map: Record<PortfolioCategory, PortfolioContext[]> = {
 		INVESTMENTS: [],
 		CRYPTO: [],
 	};
@@ -159,16 +159,16 @@ function categorySumLabel(): string {
 	return '—';
 }
 
-function goToEdit(portfolio: PortfolioResponse) {
+function goToEdit(portfolio: PortfolioContext) {
 	router.push({ name: 'editPortfolio', params: { id: portfolio.id } });
 }
 
-function openMenu(e: Event, portfolio: PortfolioResponse | null) {
+function openMenu(e: Event, portfolio: PortfolioContext | null) {
 	menuPortfolioContext.value = portfolio;
 	menuRef.value?.toggle(e);
 }
 
 onMounted(() => {
-	portfoliosStore.fetchPortfolios();
+	store.fetchPortfolios();
 });
 </script>

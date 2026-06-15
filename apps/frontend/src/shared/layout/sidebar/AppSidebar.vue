@@ -35,55 +35,27 @@
 			</RouterLink>
 		</div>
 
-		<div class="flex justify-center px-2 pt-15">
-			<Button
-				class="sidebar-action w-full flex flex-row items-center justify-center gap-2 rounded-lg py-2.5"
-				:class="isOpen ? 'px-4' : 'px-0'"
-				@click="toggleQuickActionsMenu"
-			>
-				<i class="pi pi-plus shrink-0" :class="isOpen ? 'text-base' : 'text-lg'" />
-				<Transition name="fade">
-					<span v-show="isOpen" class="text-sm font-medium">Действия</span>
-				</Transition>
-			</Button>
-			<Menu id="actions-menu" ref="menu" :model="props.quickActions" :popup="true" />
-		</div>
+		<SidebarQuickActionsBtn :is-open />
+		
 		<nav class="mt-6 flex flex-1 flex-col gap-2 px-2">
-			<RouterLink
+			<SidbarNavItem 
 				v-for="item in navbarItems"
-				:key="item.label"
-				:to="item.url"
-				active-class="sidebar-item-active"
-				class="sidebar-item flex flex-row items-center gap-3 rounded-lg py-2.5 text-slate-200 transition-colors"
-				:class="[isOpen ? 'px-4' : 'justify-center px-0']"
-			>
-				<i :class="item.icon" class="text-lg shrink-0 w-6 text-center" />
-				<Transition name="fade">
-					<span v-show="isOpen" class="text-sm font-medium">{{ item.label }}</span>
-				</Transition>
-			</RouterLink>
+				v-bind="item"
+				:key="item.url"
+				:is-open="isOpen"
+			/>
 		</nav>
 	</aside>
 </template>
 
 <script setup lang="ts">
-import type { MenuItem } from 'primevue/menuitem';
+
+import SidbarNavItem from './SidebarNavBtn.vue';
+import SidebarQuickActionsBtn from './SidebarQuickActionsBtn.vue';
 import { ref } from 'vue';
 
-const props = withDefaults(
-	defineProps<{
-		quickActions?: MenuItem[];
-	}>(),
-	{ quickActions: () => [] },
-);
 
 const isOpen = ref(true);
-const menu = ref();
-
-function toggleQuickActionsMenu(e: Event) {
-	menu.value.toggle(e);
-}
-
 const navbarItems = ref([
 	{
 		label: 'Портфель',
@@ -101,6 +73,7 @@ const navbarItems = ref([
 		url: '/app/management',
 	},
 ]);
+
 </script>
 
 <style scoped>

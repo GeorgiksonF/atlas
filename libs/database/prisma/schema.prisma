@@ -32,7 +32,7 @@ model Portfolio {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Restrict)
 
-  transactions Transactions[]
+  transactions Transaction[]
 
   @@map("portfolios")
 }
@@ -50,13 +50,13 @@ model Asset {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  transactions Transactions[]
+  transactions Transaction[]
   quote Quote?
 
   @@map("assets")
 }
 
-model Transactions {
+model Transaction {
   id String @id @default(uuid())
   quantity Float
   price Decimal @db.Decimal(12, 2)

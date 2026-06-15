@@ -11,12 +11,16 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreatePortfolioDto, UpdatePortfolioDto } from './dto/portfolio.dto';
+import { PortfolioSummaryService } from './portfolio-summary.service';
 import { PortfoliosService } from './portfolios.service';
 
 @Controller('portfolios')
 @UseGuards(JwtAuthGuard)
 export class PortfoliosController {
-	constructor(private readonly portfoliosService: PortfoliosService) {}
+	constructor(
+		private readonly portfoliosService: PortfoliosService,
+		private readonly portfolioSummaryService: PortfolioSummaryService,
+	) {}
 
 	@Get()
 	getPortfolios(@Request() req: { user: { userId: string } }) {
@@ -26,6 +30,24 @@ export class PortfoliosController {
 	@Get('brokers')
 	getBrokers() {
 		return this.portfoliosService.getBrokers();
+	}
+
+	@Get('summary/all')
+	getSummaryAll(@Request() req: { user: { userId: string } }) {
+		return this.portfolioSummaryService.getSummaryForAllUserPortfolios(
+			req.user.userId,
+		);
+	}
+
+	@Get(':id/summary')
+	getPortfolioSummary(
+		@Param('id') id: string,
+		@Request() req: { user: { userId: string } },
+	) {
+		return this.portfolioSummaryService.getSummaryForPortfolio(
+			id,
+			req.user.userId,
+		);
 	}
 
 	@Get(':id')

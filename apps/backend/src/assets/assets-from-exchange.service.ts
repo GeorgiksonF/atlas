@@ -9,9 +9,7 @@ import type { AssetWithQuoteResponse, QuoteProviderItem } from '@atlas/types';
 import type { IQuoteProvider } from '../quotes/contract/quote-provider.interface';
 import { QUOTE_PROVIDER } from '../quotes/contract/quote-provider.interface';
 import { MoexSearchService } from './moex-search.service';
-
-type AssetWithQuoteRow = Prisma.AssetGetPayload<{ include: { quote: true } }>;
-
+import { assetWithQuotesToResponse } from './utils/adapters';
 @Injectable()
 export class AssetsFromExchangeService {
 	constructor(
@@ -32,7 +30,7 @@ export class AssetsFromExchangeService {
 		});
 
 		if (existing) {
-			return this.mapRowToResponse(existing);
+			return assetWithQuotesToResponse(existing);
 		}
 
 		const results = await this.moexSearch.search(normalized);
@@ -62,7 +60,7 @@ export class AssetsFromExchangeService {
 					include: { quote: true },
 				});
 				if (raced) {
-					return this.mapRowToResponse(raced);
+					return assetWithQuotesToResponse(raced);
 				}
 			}
 			throw e;
@@ -94,17 +92,5 @@ export class AssetsFromExchangeService {
 		}
 
 		return { ...asset };
-	}
-
-	private mapRowToResponse(row: AssetWithQuoteRow): AssetWithQuoteResponse {
-		return {
-			...row,
-			quote: row.quote
-				? {
-						price: Number(row.quote.price),
-						currency: row.quote.currency,
-					}
-				: undefined,
-		};
 	}
 }

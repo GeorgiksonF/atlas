@@ -17,10 +17,29 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			'@': fileURLToPath(new URL('./src', import.meta.url)),
-			// монорепо: зависимости поднимаются в корень, Vite ищет в apps/frontend/node_modules
-			zod: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..', 'node_modules/zod'),
-			'vee-validate': path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..', 'node_modules/vee-validate'),
-			'@vee-validate/zod': path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..', 'node_modules/@vee-validate/zod'),
+			zod: path.resolve(
+				path.dirname(fileURLToPath(import.meta.url)),
+				'../..',
+				'node_modules/zod',
+			),
+			'vee-validate': path.resolve(
+				path.dirname(fileURLToPath(import.meta.url)),
+				'../..',
+				'node_modules/vee-validate',
+			),
+			'@vee-validate/zod': path.resolve(
+				path.dirname(fileURLToPath(import.meta.url)),
+				'../..',
+				'node_modules/@vee-validate/zod',
+			),
+			'@utils': fileURLToPath(new URL('./src/shared/utils', import.meta.url)),
+			'@layout': fileURLToPath(new URL('./src/shared/layout', import.meta.url)),
+			'@features': fileURLToPath(new URL('./src/features', import.meta.url)),
+			'@widgets': fileURLToPath(new URL('./src/widgets', import.meta.url)),
+			'@entities': fileURLToPath(new URL('./src/entities', import.meta.url)),
+			
+			'@composables': fileURLToPath(new URL('./src/shared/composables', import.meta.url)),
+			'@components': fileURLToPath(new URL('./src/shared/components', import.meta.url)),
 		},
 	},
 	server: {
