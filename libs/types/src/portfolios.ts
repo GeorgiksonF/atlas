@@ -1,4 +1,5 @@
 import type { TransactionResponse } from './transactions';
+import type { PortfolioBroker } from './broker'
 
 export type PortfolioCategory = 'INVESTMENTS' | 'CRYPTO';
 
@@ -6,21 +7,21 @@ export type CreatePortfolio = {
 	name: string;
 	description?: string;
 	category?: PortfolioCategory;
-	broker?: string;
+	broker?: PortfolioBroker;
 };
 
 export type UpdatePortfolio = {
 	name?: string;
 	description?: string;
 	category?: PortfolioCategory;
-	broker?: string;
+	broker?: PortfolioBroker;
 };
 
 export type PortfolioResponse = {
 	id: string;
 	name: string;
 	category: PortfolioCategory;
-	broker: string | null;
+	broker: PortfolioBroker | null;
 	createdAt: Date;
 	updatedAt: Date;
 	description: string | null;

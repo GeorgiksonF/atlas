@@ -5,3 +5,4 @@ export * from "./portfolio-summary";
 export * from "./assets";
 export * from "./quotes";
 export * from "./transactions";
+export * from "./broker";

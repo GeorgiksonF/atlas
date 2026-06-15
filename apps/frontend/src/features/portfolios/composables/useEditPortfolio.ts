@@ -4,7 +4,7 @@ import { useAppToast } from '@utils';
 import { getErrorMessage } from '@/shared/api/errorMessage';
 import { portfoliosRepository } from '@/features/portfolios/api/portfoliosRepository';
 import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
-import { PORTFOLIO_CATEGORY_LABELS } from '@/features/portfolios/constants/categories';
+import { PORTFOLIO_CATEGORY_LABELS } from '@/features/portfolios/constants/constants';
 import type { PortfolioCategory, PortfolioResponse } from '@atlas/types';
 import { validatePortfolioName } from '@/features/portfolios/utils/createPortfolioValidation';
 

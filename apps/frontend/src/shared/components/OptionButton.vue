@@ -4,9 +4,11 @@
 		class="rounded-lg border py-3 transition-colors cursor-pointer font-semibold bg-slate-600/50 min-w-0 px-4"
 		:class="[
 			buttonClass,
-			isSelected ? 'border-indigo-500' : (unselectedClass ?? 'border-slate-600 text-slate-300 hover:border-slate-500 hover:bg-slate-700'),
+			isSelected
+				? 'border-indigo-500'
+				: 'border-slate-600 text-slate-300 hover:border-slate-500 hover:bg-slate-700',
 		]"
-		@click="$emit('update:modelValue', option.value)"
+		@click="modelValue = option.value"
 	>
 		{{ option.label }}
 	</button>
@@ -15,16 +17,17 @@
 <script setup lang="ts" generic="T">
 import { computed } from 'vue';
 
-const props = defineProps<{
-	option: { value: T; label: string };
-	modelValue: T | null;
-	buttonClass?: string;
-	unselectedClass?: string;
-}>();
+const props = withDefaults(
+	defineProps<{
+		option: { value: T; label: string };
+		buttonClass?: string;
+	}>(),
+	{
+		buttonClass: '',
+	},
+);
 
-defineEmits<{
-	(e: 'update:modelValue', value: T): void;
-}>();
+const modelValue = defineModel<T | null>('modelValue');
 
-const isSelected = computed(() => props.modelValue === props.option.value);
+const isSelected = computed(() => modelValue.value === props.option.value);
 </script>

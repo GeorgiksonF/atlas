@@ -1,9 +1,13 @@
-import type { CreatePortfolio, UpdatePortfolio } from '@atlas/types';
+import type {
+	CreatePortfolio,
+	UpdatePortfolio,
+	PortfolioBroker,
+} from '@atlas/types';
 import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { PORTFOLIO_BROKERS } from '../constants/brokers';
+import { PORTFOLIO_BROKERS } from '../constants/broker';
 
 const PORTFOLIO_CATEGORIES = ['INVESTMENTS', 'CRYPTO'] as const;
-const BROKER_VALUES = PORTFOLIO_BROKERS as unknown as string[];
+const BROKER_KEYS = Object.keys(PORTFOLIO_BROKERS) as PortfolioBroker[];
 
 export class CreatePortfolioDto implements CreatePortfolio {
 	@IsString()
@@ -21,8 +25,8 @@ export class CreatePortfolioDto implements CreatePortfolio {
 
 	@IsString()
 	@IsOptional()
-	@IsIn(BROKER_VALUES)
-	broker?: string;
+	@IsIn(BROKER_KEYS)
+	broker?: PortfolioBroker;
 }
 
 export class UpdatePortfolioDto implements UpdatePortfolio {
@@ -42,6 +46,6 @@ export class UpdatePortfolioDto implements UpdatePortfolio {
 
 	@IsString()
 	@IsOptional()
-	@IsIn(BROKER_VALUES)
-	broker?: string;
+	@IsIn(BROKER_KEYS)
+	broker?: PortfolioBroker;
 }

@@ -1,8 +1,10 @@
-import { Prisma } from '@atlas/database';
+import { Prisma, Portfolio } from '@atlas/database';
 
 import type {
 	PortfolioWithTransactionsResponse,
 	TransactionResponse,
+	PortfolioBroker,
+	PortfolioResponse,
 } from '@atlas/types';
 
 type PortfolioWithTransactionsRow = Prisma.PortfolioGetPayload<{
@@ -11,13 +13,13 @@ type PortfolioWithTransactionsRow = Prisma.PortfolioGetPayload<{
 	};
 }>;
 
-export const portfolioToResponse = (
+export const portfolioWithTransactionToResponse = (
 	row: PortfolioWithTransactionsRow,
 ): PortfolioWithTransactionsResponse => ({
 	id: row.id,
 	name: row.name,
 	category: row.category,
-	broker: row.broker,
+	broker: row.broker as PortfolioBroker | null,
 	createdAt: row.createdAt,
 	updatedAt: row.updatedAt,
 	description: row.description,
@@ -35,4 +37,15 @@ export const portfolioToResponse = (
 			assetId: tx.assetId,
 		}),
 	),
+});
+
+export const portfolioToResponse = (row: Portfolio): PortfolioResponse => ({
+	id: row.id,
+	name: row.name,
+	category: row.category,
+	broker: row.broker as PortfolioBroker | null,
+	createdAt: row.createdAt,
+	updatedAt: row.updatedAt,
+	description: row.description,
+	userId: row.userId,
 });

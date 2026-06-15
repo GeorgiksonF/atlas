@@ -3,6 +3,7 @@ import {
 	ForbiddenException,
 	Injectable,
 	NotFoundException,
+	Logger,
 } from '@nestjs/common';
 import { PrismaClient } from '@atlas/database';
 import type {
@@ -10,16 +11,25 @@ import type {
 	PortfolioResponse,
 	PortfoliosResponse,
 	UpdatePortfolio,
+	BrokerResponse,
 } from '@atlas/types';
-import { PORTFOLIO_BROKERS } from './constants/brokers';
 import { PORTFOLIO_ERROR_MESSAGES } from './constants/messages';
+import { PORTFOLIO_BROKERS, isPortfolioBroker } from './constants/broker';
+import { portfolioToResponse } from './utils/adapters';
 
 @Injectable()
 export class PortfoliosService {
 	constructor(private readonly prisma: PrismaClient) {}
 
-	getBrokers(): string[] {
-		return [...PORTFOLIO_BROKERS];
+	private readonly logger = new Logger(PortfoliosService.name);
+	getBrokers(): BrokerResponse[] {
+		this.logger.debug('sd');
+		return Object.keys(PORTFOLIO_BROKERS)
+			.filter(isPortfolioBroker)
+			.map((value) => ({
+				value,
+				label: PORTFOLIO_BROKERS[value],
+			}));
 	}
 
 	async findAllByUserId(userId: string): Promise<PortfoliosResponse> {
@@ -28,9 +38,11 @@ export class PortfoliosService {
 				PORTFOLIO_ERROR_MESSAGES.USER_ID_REQUIRED,
 			);
 		}
-		return this.prisma.portfolio.findMany({
+		const portfolio = await this.prisma.portfolio.findMany({
 			where: { userId },
 		});
+
+		return portfolio.map(portfolioToResponse);
 	}
 
 	async findById(id: string, userId: string): Promise<PortfolioResponse> {
@@ -52,7 +64,7 @@ export class PortfoliosService {
 				PORTFOLIO_ERROR_MESSAGES.PORTFOLIO_ACCESS_DENIED,
 			);
 		}
-		return portfolio;
+		return portfolioToResponse(portfolio);
 	}
 
 	async create(
@@ -72,12 +84,14 @@ export class PortfoliosService {
 				PORTFOLIO_ERROR_MESSAGES.USER_NOT_FOUND,
 			);
 		}
-		return this.prisma.portfolio.create({
+		const portfolio = await this.prisma.portfolio.create({
 			data: {
 				userId,
 				...dto,
 			},
 		});
+
+		return portfolioToResponse(portfolio);
 	}
 
 	async update(
@@ -103,10 +117,12 @@ export class PortfoliosService {
 				PORTFOLIO_ERROR_MESSAGES.PORTFOLIO_ACCESS_DENIED,
 			);
 		}
-		return this.prisma.portfolio.update({
+		const portfolioUpdated = await this.prisma.portfolio.update({
 			where: { id },
 			data: dto,
 		});
+
+		return portfolioToResponse(portfolioUpdated);
 	}
 
 	async delete(id: string, userId: string): Promise<void> {

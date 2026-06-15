@@ -5,6 +5,7 @@ import type {
 	PortfolioResponse,
 	PortfoliosResponse,
 	UpdatePortfolio,
+	BrokerResponse,
 } from '@atlas/types';
 
 export const portfoliosRepository = {
@@ -13,8 +14,8 @@ export const portfoliosRepository = {
 		return data;
 	},
 
-	async getBrokers(): Promise<string[]> {
-		const { data } = await apiClient.get<string[]>('/portfolios/brokers');
+	async getBrokers(): Promise<BrokerResponse[]> {
+		const { data } = await apiClient.get<BrokerResponse[]>('/portfolios/brokers');
 		return data;
 	},
 
@@ -23,9 +24,7 @@ export const portfoliosRepository = {
 		return data;
 	},
 
-	async getSummary(
-		portfolioId: string | 'all',
-	): Promise<PortfolioSummaryResponse> {
+	async getSummary(portfolioId: string | 'all'): Promise<PortfolioSummaryResponse> {
 		const url =
 			portfolioId === 'all'
 				? '/portfolios/summary/all'

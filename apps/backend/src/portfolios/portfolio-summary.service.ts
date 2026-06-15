@@ -11,7 +11,7 @@ import {
 	type Flow,
 } from './utils/portfolio-summary.calculator';
 import { amountToRub, rubToUsd, roundMoney } from './utils/helper';
-import { portfolioToResponse } from './utils/adapters';
+import { portfolioWithTransactionToResponse } from './utils/adapters';
 
 @Injectable()
 export class PortfolioSummaryService {
@@ -59,7 +59,7 @@ export class PortfolioSummaryService {
 			return emptyPortfolioSummary();
 		}
 
-		const portfolios = response.map(portfolioToResponse);
+		const portfolios = response.map(portfolioWithTransactionToResponse);
 
 		const assets = await this.assetsService.findAllWithQuotes();
 

@@ -18,18 +18,14 @@
 				:tooltip="PORTFOLIO_METRIC_TOOLTIPS.profit"
 				icon="pi pi-chart-line"
 			>
-				<div
-					class="flex flex-wrap items-center gap-2"
-				>
+				<div class="flex flex-wrap items-center gap-2">
 					<span :class="profitAmountClass(summary.profit)">
 						{{ formatMoney(summary.profit, 'RUB') }}
 					</span>
 					<span
 						v-if="summary.profitPercentOfNetInvested != null"
 						class="rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums"
-						:class="
-							profitBadgeClass(summary.profitPercentOfNetInvested)
-						"
+						:class="profitBadgeClass(summary.profitPercentOfNetInvested)"
 					>
 						{{ formatPercent(summary.profitPercentOfNetInvested) }}
 					</span>
@@ -70,7 +66,7 @@
 <script setup lang="ts">
 import PortfolioMetricWidget from '@/shared/components/PortfolioMetricWidget.vue';
 import { formatPercent, formatMoney } from '@utils';
-import { PORTFOLIO_METRIC_TOOLTIPS } from '../constants/portfolioMetricTooltips';
+import { PORTFOLIO_METRIC_TOOLTIPS } from '../constants/constants';
 import { usePortfolioSummary } from '../composables/usePortfolioSummary';
 
 const { summary, loading } = usePortfolioSummary();
@@ -91,7 +87,7 @@ function profitBadgeClass(percent: number): string {
 	if (percent > 0) {
 		return 'bg-emerald-950/80 text-emerald-300';
 	}
-	
+
 	if (percent < 0) {
 		return 'bg-rose-950/70 text-rose-300';
 	}
