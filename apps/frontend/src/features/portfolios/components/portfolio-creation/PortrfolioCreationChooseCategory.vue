@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import type { PortfolioCategory } from '@atlas/types';
 import { OptionButton } from '@components';
-import { PORTFOLIO_CATEGORY_LABELS } from '@features/portfolios';
+import { PORTFOLIO_CATEGORY_LABELS } from '../../constants/constants';
 
 const categories = Object.entries(PORTFOLIO_CATEGORY_LABELS).map(([value, label]) => ({
 	value: value,
