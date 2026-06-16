@@ -29,5 +29,6 @@ const categories = Object.entries(PORTFOLIO_CATEGORY_LABELS).map(([value, label]
 	value: value,
 	label,
 }));
+
 const modelValue = defineModel<PortfolioCategory | null>('modelValue');
 </script>

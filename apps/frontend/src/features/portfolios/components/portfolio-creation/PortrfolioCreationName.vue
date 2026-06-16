@@ -27,8 +27,8 @@
 					aria-label="Название портфеля"
 				/>
 			</div>
-			<Message v-if="error" severity="error" variant="simple" role="alert">
-				{{ error }}
+			<Message v-if="errorMessage" severity="error" variant="simple" role="alert">
+				{{ errorMessage }}
 			</Message>
 		</div>
 	</section>
@@ -36,8 +36,6 @@
 
 <script setup lang="ts">
 import { useField } from 'vee-validate';
-import { computed } from 'vue';
 
 const { value, errorMessage } = useField<string>('name');
-const error = computed(() => String(errorMessage.value ?? ''));
 </script>

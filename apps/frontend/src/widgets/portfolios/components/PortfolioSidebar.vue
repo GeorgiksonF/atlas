@@ -19,24 +19,25 @@
 					title="Инвестиции"
 					:badge="store.portfolios.length"
 				>
-					<div v-for="p in store.portfolios" :key="p.id" class="relative rounded-lg">
-						<PortfoliosListItem
-							icon="pi pi-wallet"
-							:portfolio="p"
-							:active="store.activePortfolio.id === p.id"
-							@click="selectPortfolio(p.id)"
-						/>
-					</div>
+					<PortfoliosListItem
+						v-for="p in store.portfolios"
+						:key="p.id"
+						class="relative rounded-lg"
+						icon="pi pi-wallet"
+						:portfolio="p"
+						:active="store.activePortfolio.id === p.id"
+						@click="selectPortfolio(p.id)"
+					/>
 				</CollapsibleSection>
 
-				<AddPortfolioButton />
+				<PortfolioAddButton />
 			</div>
 		</aside>
 	</Transition>
 </template>
 
 <script setup lang="ts">
-import AddPortfolioButton from './AddPortfolioButton.vue';
+import PortfolioAddButton from './PortfolioAddButton.vue';
 import { CollapsibleSection } from '@components';
 import { usePortfoliosStore, ALL_PORTFOLIOS_CONTEXT } from '@features/portfolios';
 import { PortfoliosListItem } from '@entities/portfolios';
@@ -52,10 +53,10 @@ onClickOutside(asideRoot, () => store.togglePortfolioSidebar(), {
 	ignore: ['.portfolio-sidebar-trigger', '[data-pc-name="menu"]'],
 });
 
-function selectPortfolio(id: string) {
+const selectPortfolio = (id: string) => {
 	store.setActivePortfolio(id);
 	store.togglePortfolioSidebar();
-}
+};
 </script>
 
 <style scoped>
