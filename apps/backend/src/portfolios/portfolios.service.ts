@@ -3,7 +3,6 @@ import {
 	ForbiddenException,
 	Injectable,
 	NotFoundException,
-	Logger,
 } from '@nestjs/common';
 import { PrismaClient } from '@atlas/database';
 import type {
@@ -21,9 +20,7 @@ import { portfolioToResponse } from './utils/adapters';
 export class PortfoliosService {
 	constructor(private readonly prisma: PrismaClient) {}
 
-	private readonly logger = new Logger(PortfoliosService.name);
 	getBrokers(): BrokerResponse[] {
-		this.logger.debug('sd');
 		return Object.keys(PORTFOLIO_BROKERS)
 			.filter(isPortfolioBroker)
 			.map((value) => ({
@@ -40,6 +37,7 @@ export class PortfoliosService {
 		}
 		const portfolio = await this.prisma.portfolio.findMany({
 			where: { userId },
+			orderBy: { createdAt: 'asc' },
 		});
 
 		return portfolio.map(portfolioToResponse);

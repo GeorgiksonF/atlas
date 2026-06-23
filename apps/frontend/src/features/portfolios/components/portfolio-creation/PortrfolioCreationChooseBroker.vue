@@ -6,9 +6,9 @@
 		</div>
 		<div class="flex flex-wrap gap-3">
 			<OptionButton
-				v-for="opt in brokers"
+				v-for="opt in store.brokers"
 				:key="opt.value"
-				v-model="modelValue"
+				v-model="broker"
 				:option="opt"
 			/>
 		</div>
@@ -16,9 +16,22 @@
 </template>
 
 <script setup lang="ts">
-import type { BrokerResponse, PortfolioBroker } from '@atlas/types';
 import { OptionButton } from '@components';
+import { useField } from 'vee-validate';
+import { usePortfoliosStore } from '../../stores/portfoliosStore';
+import { watch } from 'vue';
 
-defineProps<{ brokers: BrokerResponse[] }>();
-const modelValue = defineModel<PortfolioBroker | null>('modelValue');
+const store = usePortfoliosStore();
+const { value: broker } = useField('broker');
+const { value: name } = useField<string>('name');
+
+watch(
+	() => broker.value,
+	(brokerKey) => {
+		if (!brokerKey || name.value.trim()) return;
+
+		const selected = store.brokers.find((b) => b.value === brokerKey);
+		name.value = selected?.label ?? '';
+	},
+);
 </script>

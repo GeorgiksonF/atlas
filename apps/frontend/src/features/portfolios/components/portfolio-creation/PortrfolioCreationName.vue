@@ -21,7 +21,7 @@
 					aria-label="Подсказка"
 				/>
 				<InputText
-					v-model="value"
+					v-model="name"
 					class="w-full"
 					placeholder="Например: ИИС или Брокер Тинькофф"
 					aria-label="Название портфеля"
@@ -37,5 +37,5 @@
 <script setup lang="ts">
 import { useField } from 'vee-validate';
 
-const { value, errorMessage } = useField<string>('name');
+const { value: name, errorMessage } = useField<string>('name');
 </script>

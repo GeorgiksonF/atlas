@@ -1,13 +1,21 @@
-import type { PortfolioCategory, PortfolioResponse } from '@atlas/types';
+import type {
+	PortfolioBroker,
+	PortfolioCategory,
+	PortfolioResponse,
+	BrokerResponse,
+} from '@atlas/types';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useAppToast } from '@utils';
 import { portfoliosRepository } from '../api/portfoliosRepository';
+import { getErrorMessage } from '@/shared/api/errorMessage';
+import { portfolioResponseToContext } from '../constants/adapters';
 
 export type PortfolioContext = {
 	id: string | 'all';
 	name: string;
 	category: PortfolioCategory;
+	broker: PortfolioBroker | null;
 	description?: string;
 	isSystem: boolean;
 	isComposite: boolean;
@@ -17,19 +25,11 @@ export const ALL_PORTFOLIOS_CONTEXT: PortfolioContext = {
 	id: 'all',
 	name: 'Все активы',
 	category: 'составной' as PortfolioCategory,
+	broker: null,
 	isComposite: true,
 	isSystem: true,
 	description: 'Общий портфель содержащий в себе все остальные счета',
 };
-
-const getPortfoliosContext = (portfolio: PortfolioResponse): PortfolioContext => ({
-	id: portfolio.id,
-	name: portfolio.name,
-	category: portfolio.category,
-	isComposite: false,
-	isSystem: false,
-	description: portfolio.description ?? undefined,
-});
 
 export const usePortfoliosStore = defineStore('portfolios', () => {
 	const toast = useAppToast();
@@ -38,7 +38,7 @@ export const usePortfoliosStore = defineStore('portfolios', () => {
 	const activePortfolio = ref<PortfolioContext>(ALL_PORTFOLIOS_CONTEXT);
 	const isPortfolioSidebarOpen = ref(false);
 
-	async function fetchPortfolios() {
+	const fetchPortfolios = async () => {
 		loading.value = true;
 		try {
 			const response = await portfoliosRepository.getList();
@@ -47,30 +47,30 @@ export const usePortfoliosStore = defineStore('portfolios', () => {
 				return;
 			}
 
-			portfolios.value = response.map(getPortfoliosContext);
+			portfolios.value = response.map(portfolioResponseToContext);
 		} finally {
 			loading.value = false;
 		}
-	}
+	};
 
-	function setActivePortfolio(id: string | 'all') {
+	const setActivePortfolio = (id: string | 'all') => {
 		if (id === 'all') {
 			activePortfolio.value = ALL_PORTFOLIOS_CONTEXT;
 			return;
 		}
 
 		activePortfolio.value = portfolios.value.find((p) => p.id === id) ?? ALL_PORTFOLIOS_CONTEXT;
-	}
+	};
 
-	function togglePortfolioSidebar() {
+	const togglePortfolioSidebar = (): void => {
 		isPortfolioSidebarOpen.value = !isPortfolioSidebarOpen.value;
-	}
+	};
 
-	function setLoadError(msg: string) {
+	const setLoadError = (msg: string) => {
 		toast.error(msg);
-	}
+	};
 
-	async function deletePortfolio(id: string): Promise<void> {
+	const deletePortfolio = async (id: string) => {
 		await portfoliosRepository.delete(id);
 
 		portfolios.value = portfolios.value.filter((p) => p.id !== id);
@@ -78,14 +78,31 @@ export const usePortfoliosStore = defineStore('portfolios', () => {
 		if (activePortfolio.value.id === id) {
 			activePortfolio.value = ALL_PORTFOLIOS_CONTEXT;
 		}
-	}
+	};
+
+	const brokers = ref<BrokerResponse[]>([]);
+
+	const isLoading = ref(false);
+
+	const fetchBrokers = async () => {
+		isLoading.value = true;
+		try {
+			brokers.value = await portfoliosRepository.getBrokers();
+		} catch (err) {
+			toast.error(getErrorMessage(err, 'Не удалось загрузить список брокеров'));
+		} finally {
+			isLoading.value = false;
+		}
+	};
 
 	return {
 		portfolios,
 		loading,
+		brokers,
 		activePortfolio,
 		isPortfolioSidebarOpen,
 		fetchPortfolios,
+		fetchBrokers,
 		deletePortfolio,
 		setActivePortfolio,
 		togglePortfolioSidebar,

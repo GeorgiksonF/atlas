@@ -12,7 +12,7 @@
 			<OptionButton
 				v-for="cat in categories"
 				:key="cat.value"
-				v-model="modelValue"
+				v-model="category"
 				:option="cat"
 				button-class="w-60"
 			/>
@@ -21,14 +21,14 @@
 </template>
 
 <script setup lang="ts">
-import type { PortfolioCategory } from '@atlas/types';
 import { OptionButton } from '@components';
 import { PORTFOLIO_CATEGORY_LABELS } from '../../constants/constants';
+import { useField } from 'vee-validate';
 
 const categories = Object.entries(PORTFOLIO_CATEGORY_LABELS).map(([value, label]) => ({
 	value: value,
 	label,
 }));
 
-const modelValue = defineModel<PortfolioCategory | null>('modelValue');
+const { value: category } = useField('category');
 </script>

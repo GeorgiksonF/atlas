@@ -8,10 +8,10 @@
 			</StepList>
 			<StepPanels>
 				<StepPanel :value="STEPS.TYPE">
-					<PortrfolioCreationChooseCategory v-model="category" />
+					<PortrfolioCreationChooseCategory />
 				</StepPanel>
 				<StepPanel :value="STEPS.BROKER">
-					<PortrfolioCreationChooseBroker v-model="broker" :brokers />
+					<PortrfolioCreationChooseBroker />
 				</StepPanel>
 				<StepPanel :value="STEPS.NAME">
 					<PortrfolioCreationName />
@@ -25,7 +25,7 @@
 					v-if="step > STEPS.TYPE"
 					label="Назад"
 					severity="secondary"
-					@click="prevStep"
+					@click="--step"
 				/>
 			</div>
 			<div class="flex">
@@ -33,14 +33,14 @@
 					v-if="step < STEPS.NAME"
 					:disabled="!canProceed"
 					label="Далее"
-					@click="nextStep"
+					@click="++step"
 				/>
 				<Button
 					v-else
 					label="Создать"
 					:loading="loading"
-					:disabled="loading || !meta.valid"
-					@click="onSubmit"
+					:disabled="loading"
+					@click="save"
 				/>
 			</div>
 		</div>
@@ -48,11 +48,34 @@
 </template>
 
 <script setup lang="ts">
-import { useCreatePortfolio, STEPS } from '../composables/useCreatePortfolio';
+import { usePortfolioForm } from '../composables/usePortofolioForm.ts';
 import PortrfolioCreationChooseCategory from './portfolio-creation/PortrfolioCreationChooseCategory.vue';
 import PortrfolioCreationChooseBroker from './portfolio-creation/PortrfolioCreationChooseBroker.vue';
 import PortrfolioCreationName from './portfolio-creation/PortrfolioCreationName.vue';
+import { PortfolioForm } from './schemas/portfolioFormSchemas.ts';
+import { portfoliosRepository } from '../api/portfoliosRepository';
+import { computed, ref } from 'vue';
+import { portoflioFormToCreate } from '../constants/adapters.ts';
+import { useRouter } from 'vue-router';
 
-const { step, loading, meta, canProceed, category, broker, brokers, onSubmit, nextStep, prevStep } =
-	useCreatePortfolio();
+const router = useRouter();
+
+const submit = async (form: PortfolioForm) => {
+	return await portfoliosRepository.create(portoflioFormToCreate(form));
+};
+
+const { save, loading, portfolioForm } = usePortfolioForm({
+	submit,
+	onSuccess: () => router.push({ name: 'portfolio' }),
+});
+
+const STEPS = { TYPE: 1, BROKER: 2, NAME: 3 } as const;
+
+const step = ref(1);
+
+const canProceed = computed(() => {
+	if (step.value === STEPS.TYPE) return portfolioForm.category != null;
+	if (step.value === STEPS.BROKER) return portfolioForm.broker != null;
+	return false;
+});
 </script>

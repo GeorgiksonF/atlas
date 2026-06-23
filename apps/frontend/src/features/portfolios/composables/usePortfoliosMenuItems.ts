@@ -3,12 +3,12 @@ import { useRouter } from 'vue-router';
 import { MenuItem } from 'primevue/menuitem';
 import { PortfolioContext } from '../stores/portfoliosStore';
 
-const router = useRouter();
-
 export const usePortfolioMenuItems = (
 	portfoio: PortfolioContext,
 	onDelete: (portfoio: PortfolioContext) => void,
 ) => {
+	const router = useRouter();
+
 	const items = ref<MenuItem[]>([
 		{
 			label: 'Редактировать',
@@ -26,5 +26,5 @@ export const usePortfolioMenuItems = (
 		},
 	]);
 
-	return items.value.filter((item) => !item.isSystem);
+	return items.value.filter((item) => !item.isSystem && !item.disabled);
 };

@@ -22,6 +22,7 @@ const router = createRouter({
 				const store = usePortfoliosStore();
 				try {
 					await store.fetchPortfolios();
+					await store.fetchBrokers();
 				} catch {
 					store.setLoadError('Не удалось загрузить портфели');
 				}
@@ -47,7 +48,7 @@ const router = createRouter({
 				{
 					path: 'management',
 					name: 'portfolioManagement',
-					component: () => import('../views/ManagePortfoliosView.vue'),
+					component: () => import('../views/PortfoliosManagerView.vue'),
 				},
 				{
 					path: 'management/:id/edit',
