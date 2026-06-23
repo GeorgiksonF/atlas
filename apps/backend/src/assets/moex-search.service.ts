@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+
 import type { AssetSearchItem, AssetType } from '@atlas/types';
 
 const MOEX_ISS_BASE = 'https://iss.moex.com/iss';

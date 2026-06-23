@@ -1,7 +1,8 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
+
+import { AssetsModule } from '../assets/assets.module';
 import { AuthModule } from '../auth/auth.module';
 import { PortfoliosModule } from '../portfolios/portfolios.module';
-import { AssetsModule } from '../assets/assets.module';
 import { TransactionsController } from './transactions.controller';
 import { TransactionsService } from './transactions.service';
 

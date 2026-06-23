@@ -43,13 +43,14 @@
 </template>
 
 <script setup lang="ts">
-import {
-	usePortfolioMenuItems,
-	usePortfolioDeleteConfirm,
-	usePortfoliosStore,
-	PortfolioContext,
-} from '@features/portfolios';
 import { ref } from 'vue';
+
+import {
+	PortfolioContext,
+	usePortfolioDeleteConfirm,
+	usePortfolioMenuItems,
+	usePortfoliosStore,
+} from '@features/portfolios';
 
 const store = usePortfoliosStore();
 const { confirmDeletePortfolio } = usePortfolioDeleteConfirm({

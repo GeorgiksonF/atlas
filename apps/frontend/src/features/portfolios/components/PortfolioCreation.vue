@@ -48,15 +48,18 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+import { portfoliosRepository } from '../api/portfoliosRepository';
 import { usePortfolioForm } from '../composables/usePortofolioForm.ts';
-import PortrfolioCreationChooseCategory from './portfolio-creation/PortrfolioCreationChooseCategory.vue';
+import { portoflioFormToCreate } from '../constants/adapters.ts';
 import PortrfolioCreationChooseBroker from './portfolio-creation/PortrfolioCreationChooseBroker.vue';
+import PortrfolioCreationChooseCategory from './portfolio-creation/PortrfolioCreationChooseCategory.vue';
 import PortrfolioCreationName from './portfolio-creation/PortrfolioCreationName.vue';
 import { PortfolioForm } from './schemas/portfolioFormSchemas.ts';
-import { portfoliosRepository } from '../api/portfoliosRepository';
-import { computed, ref } from 'vue';
-import { portoflioFormToCreate } from '../constants/adapters.ts';
-import { useRouter } from 'vue-router';
+
+
 
 const router = useRouter();
 

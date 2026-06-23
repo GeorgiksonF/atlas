@@ -1,10 +1,11 @@
-import { apiClient } from '@/shared/api/client';
 import type {
 	AssetResponse,
 	AssetSearchItem,
 	AssetsResponse,
 	AssetWithQuoteResponse,
 } from '@atlas/types';
+
+import { apiClient } from '@/shared/api/client';
 
 export const assetsRepository = {
 	async getList(): Promise<AssetsResponse> {

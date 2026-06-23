@@ -4,16 +4,18 @@ import {
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common';
+
 import { PrismaClient } from '@atlas/database';
 import type {
+	BrokerResponse,
 	CreatePortfolio,
 	PortfolioResponse,
 	PortfoliosResponse,
 	UpdatePortfolio,
-	BrokerResponse,
 } from '@atlas/types';
+
+import { isPortfolioBroker, PORTFOLIO_BROKERS } from './constants/broker';
 import { PORTFOLIO_ERROR_MESSAGES } from './constants/messages';
-import { PORTFOLIO_BROKERS, isPortfolioBroker } from './constants/broker';
 import { portfolioToResponse } from './utils/adapters';
 
 @Injectable()

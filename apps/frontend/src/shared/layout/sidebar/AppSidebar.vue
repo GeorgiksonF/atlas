@@ -50,9 +50,10 @@
 
 <script setup lang="ts">
 
+import { ref } from 'vue';
+
 import SidbarNavItem from './SidebarNavBtn.vue';
 import SidebarQuickActionsBtn from './SidebarQuickActionsBtn.vue';
-import { ref } from 'vue';
 
 
 const isOpen = ref(true);

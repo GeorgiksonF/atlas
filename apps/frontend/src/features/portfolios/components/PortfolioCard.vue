@@ -32,9 +32,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { type PortfolioContext } from '../stores/portfoliosStore.ts';
-import { usePortfolioMenuItems } from '../composables/usePortfoliosMenuItems.ts';
+
 import { usePortfolioDeleteConfirm } from '../composables/usePortfolioDeleteConfirm.ts';
+import { usePortfolioMenuItems } from '../composables/usePortfoliosMenuItems.ts';
+import { type PortfolioContext } from '../stores/portfoliosStore.ts';
 import { getPortfolioCategoryLabel } from '../utils/helper.ts';
 
 const props = defineProps<{
@@ -52,5 +53,9 @@ const openMenu = (e: Event) => {
 
 const menuItems = usePortfolioMenuItems(props.portfolio, confirmDeletePortfolio);
 
-const goToEdit = () => router.push({ name: 'editPortfolio', params: { id: props.portfolio.id } });
+const goToEdit = () => {
+	if (props.portfolio.isSystem) return;
+
+	router.push({ name: 'editPortfolio', params: { id: props.portfolio.id } });
+};
 </script>

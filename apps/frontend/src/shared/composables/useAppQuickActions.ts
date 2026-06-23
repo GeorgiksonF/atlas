@@ -1,8 +1,10 @@
-import type { MenuItem } from 'primevue/menuitem';
-import { useAppToast } from '@utils';
 import { useRouter } from 'vue-router';
+
 import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
 import { useAddTransactionModalStore } from '@/features/transactions/stores/addTransactionModalStore';
+import { useAppToast } from '@utils';
+
+import type { MenuItem } from 'primevue/menuitem';
 
 export function useAppQuickActions(): { quickActions: MenuItem[] } {
 	const router = useRouter();

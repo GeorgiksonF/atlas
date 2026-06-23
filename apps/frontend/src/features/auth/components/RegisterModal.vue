@@ -114,16 +114,19 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import AppDialog from '@/shared/components/AppDialog.vue';
 import { useRouter } from 'vue-router';
-import { useForm, useField } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
-import { useAppToast } from '@utils';
+
 import { getErrorMessage } from '@/shared/api/errorMessage';
+import AppDialog from '@/shared/components/AppDialog.vue';
+import { useAppToast } from '@utils';
+
+import { toTypedSchema } from '@vee-validate/zod';
+import { useField,useForm } from 'vee-validate';
+
 import { authRepository } from '../api/authRepository';
-import { useAuthStore } from '../stores/authStore';
 import { register } from '../constants/messages';
-import { registerSchema, type RegisterFormValues } from '../schemas/registerSchema';
+import { type RegisterFormValues,registerSchema } from '../schemas/registerSchema';
+import { useAuthStore } from '../stores/authStore';
 
 const router = useRouter();
 const toast = useAppToast();

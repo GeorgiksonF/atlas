@@ -1,12 +1,13 @@
-import { apiClient } from '@/shared/api/client';
 import type {
+	BrokerResponse,
 	CreatePortfolio,
-	PortfolioSummaryResponse,
 	PortfolioResponse,
 	PortfoliosResponse,
+	PortfolioSummaryResponse,
 	UpdatePortfolio,
-	BrokerResponse,
 } from '@atlas/types';
+
+import { apiClient } from '@/shared/api/client';
 
 export const portfoliosRepository = {
 	async getList(): Promise<PortfoliosResponse> {

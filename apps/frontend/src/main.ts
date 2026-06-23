@@ -1,12 +1,16 @@
-import { createApp } from 'vue';
-import { createPinia } from 'pinia';
 import './style.css';
+
+import { createApp } from 'vue';
+
+import { preset } from '@/config/theme';
+
+import { createPinia } from 'pinia';
+import PrimeVue from 'primevue/config';
+import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
+
 import App from './App.vue';
 import router from './router';
-import PrimeVue from 'primevue/config';
-import ToastService from 'primevue/toastservice';
-import ConfirmationService from 'primevue/confirmationservice';
-import { preset } from '@/config/theme';
 
 const app = createApp(App);
 const pinia = createPinia();

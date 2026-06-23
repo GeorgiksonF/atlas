@@ -4,12 +4,15 @@ import {
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common';
-import { Prisma, PrismaClient, type Asset } from '@atlas/database';
+
+import { type Asset, Prisma, PrismaClient } from '@atlas/database';
 import type { AssetWithQuoteResponse, QuoteProviderItem } from '@atlas/types';
+
 import type { IQuoteProvider } from '../quotes/contract/quote-provider.interface';
 import { QUOTE_PROVIDER } from '../quotes/contract/quote-provider.interface';
 import { MoexSearchService } from './moex-search.service';
 import { assetWithQuotesToResponse } from './utils/adapters';
+
 @Injectable()
 export class AssetsFromExchangeService {
 	constructor(

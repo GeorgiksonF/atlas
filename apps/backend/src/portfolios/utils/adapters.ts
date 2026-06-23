@@ -1,10 +1,9 @@
-import { Prisma, Portfolio } from '@atlas/database';
-
+import { Portfolio, Prisma } from '@atlas/database';
 import type {
-	PortfolioWithTransactionsResponse,
-	TransactionResponse,
 	PortfolioBroker,
 	PortfolioResponse,
+	PortfolioWithTransactionsResponse,
+	TransactionResponse,
 } from '@atlas/types';
 
 type PortfolioWithTransactionsRow = Prisma.PortfolioGetPayload<{

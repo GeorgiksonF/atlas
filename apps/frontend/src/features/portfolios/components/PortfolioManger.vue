@@ -50,10 +50,10 @@
 </template>
 
 <script setup lang="ts">
-import ManagementCategorySection from './ManagementCategorySection.vue';
-import PortfolioCard from './PortfolioCard.vue';
 import { usePortfolioGrouped } from '../composables/usePortfolioGrouped.ts';
 import { ALL_PORTFOLIOS_CONTEXT } from '../stores/portfoliosStore';
+import ManagementCategorySection from './ManagementCategorySection.vue';
+import PortfolioCard from './PortfolioCard.vue';
 
 const { visibleCategories, expandedByCategory, searchQuery, loading } = usePortfolioGrouped();
 </script>

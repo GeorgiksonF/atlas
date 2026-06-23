@@ -1,10 +1,11 @@
 import { z } from 'zod';
+
 import { validation as msg } from '../constants/messages';
 import {
-	NAME_MIN_LENGTH,
 	NAME_MAX_LENGTH,
-	PASSWORD_MIN_LENGTH,
+	NAME_MIN_LENGTH,
 	PASSWORD_MAX_LENGTH,
+	PASSWORD_MIN_LENGTH,
 } from '../constants/validation';
 
 export const registerSchema = z

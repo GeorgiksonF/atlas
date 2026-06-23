@@ -1,7 +1,9 @@
 import { computed, ref } from 'vue';
+
 import type { PortfolioCategory } from '@atlas/types';
-import { type PortfolioContext, usePortfoliosStore } from '../stores/portfoliosStore';
+
 import { PORTFOLIO_CATEGORY_LABELS } from '../constants/constants.ts';
+import { type PortfolioContext, usePortfoliosStore } from '../stores/portfoliosStore';
 
 export interface Category {
 	key: PortfolioCategory;

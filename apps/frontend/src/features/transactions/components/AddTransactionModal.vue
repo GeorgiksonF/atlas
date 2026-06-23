@@ -116,20 +116,22 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+
+import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
+import { getErrorMessage } from '@/shared/api/errorMessage';
+import AppDialog from '@/shared/components/AppDialog.vue';
+import FormItem from '@/shared/components/FormItem.vue';
 import { useAppToast } from '@utils';
+
+import { transactionsRepository } from '../api/transactionsRepository';
+import { useAddTransactionAssetField } from '../composables/useAddTransactionAssetField';
+import { useAddTransactionForm } from '../composables/useAddTransactionForm';
 import { CURRENCY_LABELS, CURRENCY_TYPES } from '../constants/currency';
 import {
 	isTradeTransactionType,
 	TRANSACTION_TYPE_LABELS,
 	TRANSACTION_TYPES,
 } from '../constants/transactionTypes';
-import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
-import { transactionsRepository } from '../api/transactionsRepository';
-import { getErrorMessage } from '@/shared/api/errorMessage';
-import AppDialog from '@/shared/components/AppDialog.vue';
-import FormItem from '@/shared/components/FormItem.vue';
-import { useAddTransactionAssetField } from '../composables/useAddTransactionAssetField';
-import { useAddTransactionForm } from '../composables/useAddTransactionForm';
 import { createTransactionPayload } from '../utils/createTransactionPayload';
 
 const visible = defineModel<boolean>('visible', { required: true });

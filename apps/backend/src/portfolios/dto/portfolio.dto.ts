@@ -1,9 +1,11 @@
 import type {
 	CreatePortfolio,
-	UpdatePortfolio,
 	PortfolioBroker,
+	UpdatePortfolio,
 } from '@atlas/types';
+
 import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+
 import { PORTFOLIO_BROKERS } from '../constants/broker';
 
 const PORTFOLIO_CATEGORIES = ['INVESTMENTS', 'CRYPTO'] as const;

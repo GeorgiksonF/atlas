@@ -1,5 +1,6 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
 import { useAuthStore } from '@/features/auth/stores/authStore';
+
+import axios, { AxiosError,AxiosInstance } from 'axios';
 
 export const apiClient: AxiosInstance = axios.create({
 	baseURL: '/api',

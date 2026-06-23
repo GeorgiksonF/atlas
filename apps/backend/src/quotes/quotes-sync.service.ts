@@ -1,11 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+
 import { PrismaClient } from '@atlas/database';
+
+import { AssetsService } from '../assets/assets.service';
 import {
 	IQuoteProvider,
 	QUOTE_PROVIDER,
 } from './contract/quote-provider.interface';
-import { AssetsService } from '../assets/assets.service';
 
 @Injectable()
 export class QuotesSyncService {

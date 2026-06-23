@@ -1,9 +1,10 @@
-import { apiClient } from '@/shared/api/client';
 import type {
 	CreateTransaction,
 	TransactionResponse,
 	TransactionsResponse,
 } from '@atlas/types';
+
+import { apiClient } from '@/shared/api/client';
 
 export const transactionsRepository = {
 	async getList(portfolioId: string): Promise<TransactionsResponse> {

@@ -1,5 +1,6 @@
+import { PORTFOLIO_BROKERS,PORTFOLIO_CATEGORIES } from '@atlas/types';
+
 import { z } from 'zod';
-import { PORTFOLIO_CATEGORIES, PORTFOLIO_BROKERS } from '@atlas/types';
 
 export const portfolioFormSchema = z.object({
 	category: z.nullable(z.enum(PORTFOLIO_CATEGORIES).refine((v) => v !== null)),

@@ -9,11 +9,12 @@ import {
 	Query,
 	UseGuards,
 } from '@nestjs/common';
+
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AssetsService } from './assets.service';
+import { AssetsFromExchangeService } from './assets-from-exchange.service';
 import { CreateAssetDto, UpdateAssetDto } from './dto/asset.dto';
 import { EnsureFromExchangeDto } from './dto/ensure-from-exchange.dto';
-import { AssetsFromExchangeService } from './assets-from-exchange.service';
-import { AssetsService } from './assets.service';
 import { MoexSearchService } from './moex-search.service';
 
 @Controller('assets')

@@ -3,14 +3,17 @@ import {
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+
 import { PrismaClient } from '@atlas/database';
 import type {
+	LoginRequest,
 	RegisterRequest,
 	RegisterResponse,
-	LoginRequest,
 } from '@atlas/types';
-import { JwtService } from '@nestjs/jwt';
+
 import * as bcrypt from 'bcrypt';
+
 import { AUTH_ERROR_MESSAGES } from './constants/messages';
 
 @Injectable()

@@ -16,10 +16,14 @@
 </template>
 
 <script setup lang="ts">
-import { OptionButton } from '@components';
-import { useField } from 'vee-validate';
-import { usePortfoliosStore } from '../../stores/portfoliosStore';
 import { watch } from 'vue';
+
+import { OptionButton } from '@components';
+
+import { useField } from 'vee-validate';
+
+import { usePortfoliosStore } from '../../stores/portfoliosStore';
+
 
 const store = usePortfoliosStore();
 const { value: broker } = useField('broker');

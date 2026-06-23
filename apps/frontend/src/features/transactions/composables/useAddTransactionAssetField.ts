@@ -1,12 +1,15 @@
-import { onBeforeUnmount, ref, watch, type Ref } from 'vue';
+import { onBeforeUnmount, type Ref,ref, watch } from 'vue';
+
 import type {
 	AssetSearchItem,
 	AssetWithQuoteResponse,
 	CurrencyType,
 	TransactionType,
 } from '@atlas/types';
+
 import { assetsRepository } from '@/features/assets/api/assetsRepository';
 import { getErrorMessage } from '@/shared/api/errorMessage';
+
 import { isTradeTransactionType } from '../constants/transactionTypes';
 
 const DEBOUNCE_MS = 400;

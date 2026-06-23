@@ -1,4 +1,5 @@
 import type { LoginRequest } from '@atlas/types';
+
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class LoginDto implements LoginRequest {

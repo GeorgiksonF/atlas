@@ -37,12 +37,18 @@
 </template>
 
 <script setup lang="ts">
-import PortfolioAddButton from './PortfolioAddButton.vue';
-import { CollapsibleSection } from '@components';
-import { usePortfoliosStore, ALL_PORTFOLIOS_CONTEXT } from '@features/portfolios';
-import { PortfoliosListItem } from '@entities/portfolios';
-import { onClickOutside } from '@vueuse/core';
 import { ref } from 'vue';
+
+import { CollapsibleSection } from '@components';
+import { PortfoliosListItem } from '@entities/portfolios';
+import { ALL_PORTFOLIOS_CONTEXT,usePortfoliosStore } from '@features/portfolios';
+
+import { onClickOutside } from '@vueuse/core';
+
+import PortfolioAddButton from './PortfolioAddButton.vue';
+
+
+
 
 const store = usePortfoliosStore();
 

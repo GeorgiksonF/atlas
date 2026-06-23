@@ -1,17 +1,19 @@
 import { Injectable } from '@nestjs/common';
+
 import { PrismaClient } from '@atlas/database';
 import type { PortfolioSummaryResponse } from '@atlas/types';
-import { TransactionsService } from '../transactions/transactions.service';
+
 import { AssetsService } from '../assets/assets.service';
+import { TransactionsService } from '../transactions/transactions.service';
+import { portfolioWithTransactionToResponse } from './utils/adapters';
+import { amountToRub, roundMoney, rubToUsd } from './utils/helper';
 import {
 	computePortfolioSummary,
 	computeXirr,
 	emptyPortfolioSummary,
-	sumPortfoliosSummaries,
 	type Flow,
+	sumPortfoliosSummaries,
 } from './utils/portfolio-summary.calculator';
-import { amountToRub, rubToUsd, roundMoney } from './utils/helper';
-import { portfolioWithTransactionToResponse } from './utils/adapters';
 
 @Injectable()
 export class PortfolioSummaryService {

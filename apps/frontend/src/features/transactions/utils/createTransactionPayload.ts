@@ -1,4 +1,5 @@
 import type { CreateTransaction } from '@atlas/types';
+
 import { isTradeTransactionType } from '../constants/transactionTypes';
 import type { AddTransactionFormValues } from '../schemas/addTransactionSchema';
 

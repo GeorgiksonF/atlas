@@ -1,11 +1,13 @@
+import path from 'node:path';
+
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+
+import { AssetsModule } from './assets/assets.module';
 import { AuthModule } from './auth/auth.module';
 import { PortfoliosModule } from './portfolios/portfolios.module';
 import { PrismaModule } from './prisma/prisma.module';
-import path from 'node:path';
-import { AssetsModule } from './assets/assets.module';
 import { QuotesModule } from './quotes/quotes.module';
 import { TransactionsModule } from './transactions/transactions.module';
 

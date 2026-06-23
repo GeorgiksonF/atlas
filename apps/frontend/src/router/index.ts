@@ -1,7 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
+
+import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore.ts';
+
 import LandingView from '../views/LandingView.vue';
 import LoginView from '../views/LoginView.vue';
-import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore.ts';
+
 const router = createRouter({
 	history: createWebHistory(),
 	routes: [

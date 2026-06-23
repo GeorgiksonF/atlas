@@ -46,10 +46,13 @@
 </template>
 
 <script setup lang="ts">
-import { OptionButton, FormItem } from '@components';
-import { usePortfoliosStore } from '../../stores/portfoliosStore';
-import { useField } from 'vee-validate';
 import { PORTFOLIO_CATEGORIES } from '@atlas/types';
+
+import { FormItem,OptionButton } from '@components';
+
+import { useField } from 'vee-validate';
+
+import { usePortfoliosStore } from '../../stores/portfoliosStore';
 import { getPortfolioCategoryLabel } from '../../utils/helper';
 
 const categories = PORTFOLIO_CATEGORIES.map((cat) => ({

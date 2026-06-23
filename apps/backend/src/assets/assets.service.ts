@@ -3,6 +3,7 @@ import {
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common';
+
 import { PrismaClient } from '@atlas/database';
 import type {
 	AssetResponse,
@@ -11,8 +12,10 @@ import type {
 	CreateAsset,
 	UpdateAsset,
 } from '@atlas/types';
+
 import { ASSET_ERROR_MESSAGES } from './constants/messages';
 import { assetWithQuotesToResponse } from './utils/adapters';
+
 @Injectable()
 export class AssetsService {
 	constructor(private readonly prisma: PrismaClient) {}

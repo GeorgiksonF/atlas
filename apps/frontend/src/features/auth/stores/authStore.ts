@@ -1,6 +1,8 @@
+import { computed,ref } from 'vue';
+
 import type { User } from '@atlas/types';
+
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => {
     const token = ref<string | null>(localStorage.getItem('token'));

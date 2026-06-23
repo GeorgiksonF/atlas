@@ -103,14 +103,17 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useForm, useField } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
-import { useAppToast } from '@utils';
+
 import { getErrorMessage } from '@/shared/api/errorMessage';
+import { useAppToast } from '@utils';
+
+import { toTypedSchema } from '@vee-validate/zod';
+import { useField,useForm } from 'vee-validate';
+
 import { authRepository } from '../api/authRepository';
-import { useAuthStore } from '../stores/authStore';
 import { login } from '../constants/messages';
-import { loginSchema, type LoginFormValues } from '../schemas/loginSchema';
+import { type LoginFormValues,loginSchema } from '../schemas/loginSchema';
+import { useAuthStore } from '../stores/authStore';
 
 const router = useRouter();
 const emit = defineEmits<{ 'open-register': [] }>();

@@ -1,4 +1,5 @@
 import type { CreateAsset, UpdateAsset } from '@atlas/types';
+
 import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 const ASSET_TYPES = ['STOCK', 'BOND', 'FUND'] as const;

@@ -1,5 +1,7 @@
-import type { PortfolioSummaryResponse } from '@atlas/types';
 import { ref, watch } from 'vue';
+
+import type { PortfolioSummaryResponse } from '@atlas/types';
+
 import { portfoliosRepository } from '../api/portfoliosRepository';
 import { usePortfoliosStore } from '../stores/portfoliosStore';
 

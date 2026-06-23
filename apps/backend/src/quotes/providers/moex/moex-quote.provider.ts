@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+
 import type { QuoteProviderItem } from '@atlas/types';
+
 import type { IQuoteProvider } from '../../contract/quote-provider.interface';
 
 const MOEX_ISS_BASE = 'https://iss.moex.com/iss';

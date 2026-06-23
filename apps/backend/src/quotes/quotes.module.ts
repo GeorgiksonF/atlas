@@ -1,4 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
+
 import { AssetsModule } from '../assets/assets.module';
 import { QUOTE_PROVIDER } from './contract/quote-provider.interface';
 import { MoexQuoteProvider } from './providers/moex/moex-quote.provider';

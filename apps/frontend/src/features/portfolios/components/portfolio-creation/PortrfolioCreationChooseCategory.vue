@@ -22,8 +22,10 @@
 
 <script setup lang="ts">
 import { OptionButton } from '@components';
-import { PORTFOLIO_CATEGORY_LABELS } from '../../constants/constants';
+
 import { useField } from 'vee-validate';
+
+import { PORTFOLIO_CATEGORY_LABELS } from '../../constants/constants';
 
 const categories = Object.entries(PORTFOLIO_CATEGORY_LABELS).map(([value, label]) => ({
 	value: value,

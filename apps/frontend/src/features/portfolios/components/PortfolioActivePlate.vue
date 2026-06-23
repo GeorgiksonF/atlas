@@ -13,8 +13,9 @@
 </template>
 
 <script setup lang="ts">
-import { usePortfoliosStore } from '../stores/portfoliosStore';
 import { PortfoliosListItem } from '@/entities/portfolios';
+
+import { usePortfoliosStore } from '../stores/portfoliosStore';
 
 const store = usePortfoliosStore();
 </script>

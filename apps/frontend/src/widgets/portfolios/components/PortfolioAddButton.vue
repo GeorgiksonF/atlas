@@ -10,8 +10,9 @@
 </template>
 
 <script setup lang="ts">
-import type { RouteLocationRaw } from 'vue-router';
 import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
+
+import type { RouteLocationRaw } from 'vue-router';
 
 const store = usePortfoliosStore();
 

@@ -65,9 +65,10 @@
 
 <script setup lang="ts">
 import PortfolioMetricWidget from '@/shared/components/PortfolioMetricWidget.vue';
-import { formatPercent, formatMoney } from '@utils';
-import { PORTFOLIO_METRIC_TOOLTIPS } from '../constants/constants';
+import { formatMoney,formatPercent } from '@utils';
+
 import { usePortfolioSummary } from '../composables/usePortfolioSummary';
+import { PORTFOLIO_METRIC_TOOLTIPS } from '../constants/constants';
 
 const { summary, loading } = usePortfolioSummary();
 

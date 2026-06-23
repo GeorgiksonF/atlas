@@ -1,14 +1,18 @@
+import { ref } from 'vue';
+
 import type {
+	BrokerResponse,
 	PortfolioBroker,
 	PortfolioCategory,
 	PortfolioResponse,
-	BrokerResponse,
 } from '@atlas/types';
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
-import { useAppToast } from '@utils';
-import { portfoliosRepository } from '../api/portfoliosRepository';
+
 import { getErrorMessage } from '@/shared/api/errorMessage';
+import { useAppToast } from '@utils';
+
+import { defineStore } from 'pinia';
+
+import { portfoliosRepository } from '../api/portfoliosRepository';
 import { portfolioResponseToContext } from '../constants/adapters';
 
 export type PortfolioContext = {

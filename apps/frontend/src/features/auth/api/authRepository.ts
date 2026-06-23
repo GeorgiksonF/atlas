@@ -1,9 +1,10 @@
-import { apiClient } from '@/shared/api/client';
 import type {
+	LoginRequest,
 	RegisterRequest,
 	RegisterResponse,
-	LoginRequest,
 } from '@atlas/types';
+
+import { apiClient } from '@/shared/api/client';
 
 export interface LoginResponse {
 	access_token: string;
