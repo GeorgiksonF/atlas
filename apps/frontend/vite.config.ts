@@ -7,9 +7,6 @@ import vue from '@vitejs/plugin-vue';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 
-
-
-
 export default defineConfig({
 	plugins: [
 		vue(),
@@ -37,11 +34,10 @@ export default defineConfig({
 				'node_modules/@vee-validate/zod',
 			),
 			'@utils': fileURLToPath(new URL('./src/shared/utils', import.meta.url)),
-			'@layout': fileURLToPath(new URL('./src/shared/layout', import.meta.url)),
 			'@features': fileURLToPath(new URL('./src/features', import.meta.url)),
 			'@widgets': fileURLToPath(new URL('./src/widgets', import.meta.url)),
 			'@entities': fileURLToPath(new URL('./src/entities', import.meta.url)),
-			
+
 			'@composables': fileURLToPath(new URL('./src/shared/composables', import.meta.url)),
 			'@components': fileURLToPath(new URL('./src/shared/components', import.meta.url)),
 		},

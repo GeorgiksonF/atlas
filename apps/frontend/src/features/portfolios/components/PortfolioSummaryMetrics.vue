@@ -64,11 +64,11 @@
 </template>
 
 <script setup lang="ts">
-import PortfolioMetricWidget from '@/shared/components/PortfolioMetricWidget.vue';
-import { formatMoney,formatPercent } from '@utils';
+import { formatMoney, formatPercent } from '@utils';
 
 import { usePortfolioSummary } from '../composables/usePortfolioSummary';
 import { PORTFOLIO_METRIC_TOOLTIPS } from '../constants/constants';
+import PortfolioMetricWidget from './PortfolioMetricWidget.vue';
 
 const { summary, loading } = usePortfolioSummary();
 

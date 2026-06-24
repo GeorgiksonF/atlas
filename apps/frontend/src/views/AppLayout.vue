@@ -9,7 +9,7 @@
 				<main id="main-content" class="h-full w-full p-4 text-slate-300">
 					<router-view />
 				</main>
-				<PortfolioSidebar  />
+				<PortfolioSidebar />
 			</div>
 		</div>
 
@@ -18,6 +18,6 @@
 </template>
 
 <script setup lang="ts">
-import { AppGlobalModals, AppSidebar, AppTopPanel,  } from '@layout';
+import { AppGlobalModals, AppSidebar, AppTopPanel } from '@widgets';
 import { PortfolioSidebar } from '@widgets/portfolios';
 </script>

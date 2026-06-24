@@ -12,13 +12,13 @@
 		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],
+			"@widgets": ["./src/widgets"],
 			"@widgets/*": ["./src/widgets/*"],
 			"@features/*": ["./src/features/*"],
 			"@entities/*": ["./src/entities/*"],
 			"@utils": ["./src/shared/utils"],
-			"@layout": ["./src/shared/layout"],
 			"@composables": ["./src/shared/composables"],
-			"@components": ["./src/shared/components"],
+			"@components": ["./src/shared/components"]
 		}
 	},
 	"include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
