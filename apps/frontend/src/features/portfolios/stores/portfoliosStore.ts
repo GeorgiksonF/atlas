@@ -1,11 +1,6 @@
 import { ref } from 'vue';
 
-import type {
-	BrokerResponse,
-	PortfolioBroker,
-	PortfolioCategory,
-	PortfolioResponse,
-} from '@atlas/types';
+import type { BrokerResponse, PortfolioBroker, PortfolioCategory } from '@atlas/types';
 
 import { getErrorMessage } from '@/shared/api/errorMessage';
 import { useAppToast } from '@utils';

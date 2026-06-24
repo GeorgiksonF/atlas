@@ -8,8 +8,8 @@ import { useAppToast } from '@utils';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 
-import { PortfolioForm,portfolioFormSchema } from '../components/schemas/portfolioFormSchemas';
-import { PortfolioContext,usePortfoliosStore } from '../stores/portfoliosStore';
+import { PortfolioForm, portfolioFormSchema } from '../schemas/portfolioFormSchemas';
+import { PortfolioContext, usePortfoliosStore } from '../stores/portfoliosStore';
 
 interface Props {
 	portfolio?: MaybeRefOrGetter<PortfolioContext | null>;

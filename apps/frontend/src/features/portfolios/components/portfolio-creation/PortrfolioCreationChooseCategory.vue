@@ -21,15 +21,17 @@
 </template>
 
 <script setup lang="ts">
+import { PORTFOLIO_CATEGORIES } from '@atlas/types';
+
 import { OptionButton } from '@components';
 
 import { useField } from 'vee-validate';
 
-import { PORTFOLIO_CATEGORY_LABELS } from '../../constants/constants';
+import { getPortfolioCategoryLabel } from '../../utils/helper';
 
-const categories = Object.entries(PORTFOLIO_CATEGORY_LABELS).map(([value, label]) => ({
-	value: value,
-	label,
+const categories = PORTFOLIO_CATEGORIES.map((key) => ({
+	value: key,
+	label: getPortfolioCategoryLabel(key),
 }));
 
 const { value: category } = useField('category');

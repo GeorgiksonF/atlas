@@ -47,9 +47,7 @@ const { confirmDeletePortfolio } = usePortfolioDeleteConfirm();
 const router = useRouter();
 const menuRef = ref();
 
-const openMenu = (e: Event) => {
-	menuRef.value?.toggle(e);
-};
+const openMenu = (e: Event) => menuRef.value?.toggle(e);
 
 const menuItems = usePortfolioMenuItems(props.portfolio, confirmDeletePortfolio);
 

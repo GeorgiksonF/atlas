@@ -71,10 +71,9 @@ import { useAppToast } from '@/shared/utils/toast.ts';
 import { portfoliosRepository } from '../api/portfoliosRepository';
 import { usePortfolioForm } from '../composables/usePortofolioForm.ts';
 import { portfolioResponseToContext, portoflioFormToUpdate } from '../constants/adapters.ts';
+import { PortfolioForm } from '../schemas/portfolioFormSchemas.ts';
 import { PortfolioContext } from '../stores/portfoliosStore.ts';
 import PortfolioEdititonGeneral from './portfolio-edition/PortfolioEdititonGeneral.vue';
-import { PortfolioForm } from './schemas/portfolioFormSchemas.ts';
-
 
 const router = useRouter();
 const route = useRoute();

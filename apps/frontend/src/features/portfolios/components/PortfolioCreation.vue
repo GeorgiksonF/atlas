@@ -54,12 +54,10 @@ import { useRouter } from 'vue-router';
 import { portfoliosRepository } from '../api/portfoliosRepository';
 import { usePortfolioForm } from '../composables/usePortofolioForm.ts';
 import { portoflioFormToCreate } from '../constants/adapters.ts';
+import { PortfolioForm } from '../schemas/portfolioFormSchemas.ts';
 import PortrfolioCreationChooseBroker from './portfolio-creation/PortrfolioCreationChooseBroker.vue';
 import PortrfolioCreationChooseCategory from './portfolio-creation/PortrfolioCreationChooseCategory.vue';
 import PortrfolioCreationName from './portfolio-creation/PortrfolioCreationName.vue';
-import { PortfolioForm } from './schemas/portfolioFormSchemas.ts';
-
-
 
 const router = useRouter();
 
