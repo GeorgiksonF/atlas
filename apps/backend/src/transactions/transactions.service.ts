@@ -13,7 +13,7 @@ import type {
 } from '@atlas/types';
 
 import { AssetsService } from '../assets/assets.service';
-import { PortfoliosService } from '../portfolios/portfolios.service';
+import { PortfolioAccessService } from '../portfolios/access/portfolio-access.service';
 import { TRANSACTION_ERROR_MESSAGES } from './constants/messages';
 
 export const transctionToResponse = (
@@ -26,28 +26,15 @@ export const transctionToResponse = (
 export class TransactionsService {
 	constructor(
 		private readonly prisma: PrismaClient,
-		private readonly portfoliosService: PortfoliosService,
+		private readonly portfolioAccessService: PortfolioAccessService,
 		private readonly assetsService: AssetsService,
 	) {}
-
-	private async ensurePortfolioAccess(
-		portfolioId: string,
-		userId: string,
-	): Promise<void> {
-		if (!userId) {
-			throw new BadRequestException(
-				TRANSACTION_ERROR_MESSAGES.USER_ID_REQUIRED,
-			);
-		}
-
-		await this.portfoliosService.findById(portfolioId, userId);
-	}
 
 	async findAllByPortfolioId(
 		portfolioId: string,
 		userId: string,
 	): Promise<TransactionsResponse> {
-		await this.ensurePortfolioAccess(portfolioId, userId);
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
 
 		const rows = await this.prisma.transaction.findMany({
 			where: { portfolioId },
@@ -60,7 +47,7 @@ export class TransactionsService {
 		portfolioId: string,
 		userId: string,
 	): Promise<TransactionsResponse> {
-		await this.ensurePortfolioAccess(portfolioId, userId);
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
 
 		const rows = await this.prisma.transaction.findMany({
 			where: { portfolioId },
@@ -74,7 +61,7 @@ export class TransactionsService {
 		transactionId: string,
 		userId: string,
 	): Promise<TransactionResponse> {
-		await this.ensurePortfolioAccess(portfolioId, userId);
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
 
 		const row = await this.prisma.transaction.findFirst({
 			where: { id: transactionId, portfolioId },
@@ -93,7 +80,7 @@ export class TransactionsService {
 		userId: string,
 		dto: CreateTransaction,
 	): Promise<TransactionResponse> {
-		await this.ensurePortfolioAccess(portfolioId, userId);
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
 
 		const isTrade = dto.type === 'BUY' || dto.type === 'SELL';
 		const isCash = dto.type === 'DEPOSIT' || dto.type === 'WITHDRAWAL';
@@ -138,7 +125,7 @@ export class TransactionsService {
 		userId: string,
 		dto: UpdateTransaction,
 	): Promise<TransactionResponse> {
-		await this.ensurePortfolioAccess(portfolioId, userId);
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
 
 		const existing = await this.prisma.transaction.findFirst({
 			where: { id: transactionId, portfolioId },
@@ -194,7 +181,7 @@ export class TransactionsService {
 		transactionId: string,
 		userId: string,
 	): Promise<void> {
-		await this.ensurePortfolioAccess(portfolioId, userId);
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
 
 		const existing = await this.prisma.transaction.findFirst({
 			where: { id: transactionId, portfolioId },

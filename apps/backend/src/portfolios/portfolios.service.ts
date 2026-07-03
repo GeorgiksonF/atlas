@@ -1,8 +1,4 @@
-import {
-	ForbiddenException,
-	Injectable,
-	NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { PrismaClient } from '@atlas/database';
 import type {
@@ -13,33 +9,16 @@ import type {
 	UpdatePortfolio,
 } from '@atlas/types';
 
+import { PortfolioAccessService } from './access/portfolio-access.service';
 import { isPortfolioBroker, PORTFOLIO_BROKERS } from './constants/broker';
-import { PORTFOLIO_ERROR_MESSAGES } from './constants/messages';
 import { portfolioToResponse } from './utils/adapters';
 
 @Injectable()
 export class PortfoliosService {
-	constructor(private readonly prisma: PrismaClient) {}
-
-	private async findOwnedPortfolio(id: string, userId: string) {
-		const portfolio = await this.prisma.portfolio.findUnique({
-			where: { id },
-		});
-
-		if (!portfolio) {
-			throw new NotFoundException(
-				PORTFOLIO_ERROR_MESSAGES.PORTFOLIO_NOT_FOUND,
-			);
-		}
-
-		if (portfolio.userId !== userId) {
-			throw new ForbiddenException(
-				PORTFOLIO_ERROR_MESSAGES.PORTFOLIO_ACCESS_DENIED,
-			);
-		}
-
-		return portfolio;
-	}
+	constructor(
+		private readonly prisma: PrismaClient,
+		private readonly portfolioAccessService: PortfolioAccessService,
+	) {}
 
 	getBrokers(): BrokerResponse[] {
 		return Object.keys(PORTFOLIO_BROKERS)
@@ -60,7 +39,10 @@ export class PortfoliosService {
 	}
 
 	async findById(id: string, userId: string): Promise<PortfolioResponse> {
-		const portfolio = await this.findOwnedPortfolio(id, userId);
+		const portfolio = await this.portfolioAccessService.assertOwned(
+			id,
+			userId,
+		);
 
 		return portfolioToResponse(portfolio);
 	}
@@ -84,7 +66,7 @@ export class PortfoliosService {
 		userId: string,
 		dto: UpdatePortfolio,
 	): Promise<PortfolioResponse> {
-		await this.findOwnedPortfolio(id, userId);
+		await this.portfolioAccessService.assertOwned(id, userId);
 
 		const portfolioUpdated = await this.prisma.portfolio.update({
 			where: { id },
@@ -95,7 +77,7 @@ export class PortfoliosService {
 	}
 
 	async delete(id: string, userId: string) {
-		await this.findOwnedPortfolio(id, userId);
+		await this.portfolioAccessService.assertOwned(id, userId);
 
 		await this.prisma.portfolio.delete({ where: { id } });
 	}
