@@ -24,10 +24,11 @@ export class PortfolioSummaryService {
 		portfolioId: string,
 		userId: string,
 	): Promise<PortfolioSummaryResponse> {
-		const transactions = await this.transactionService.findAllByPortfolioId(
-			portfolioId,
-			userId,
-		);
+		const transactions =
+			await this.transactionService.findAllByPortfolioIdChronological(
+				portfolioId,
+				userId,
+			);
 
 		const assetsIds = [
 			...new Set(
@@ -49,7 +50,7 @@ export class PortfolioSummaryService {
 			where: { userId },
 			include: {
 				transactions: {
-					orderBy: { date: 'asc' },
+					orderBy: [{ date: 'asc' }, { createdAt: 'asc' }],
 				},
 			},
 		});

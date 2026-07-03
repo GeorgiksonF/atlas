@@ -1,5 +1,6 @@
-import { computeXirr, type Flow } from '@/portfolios/utils/xirr';
 import { d } from '@test/fixtures/portfolio-summary.fixtures';
+
+import { computeXirr, type Flow } from '@/portfolios/utils/xirr';
 
 const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000;
 

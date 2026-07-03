@@ -135,6 +135,10 @@ type PortfolioMetrics = {
 	investorFlows: Flow[];
 };
 
+/**
+ * Транзакции должны быть отсортированы по `date asc`, при равной дате — по `createdAt asc`.
+ * Функция не пересортировывает входной массив.
+ */
 export const computePortfolioMetrics = (
 	transactions: TransactionResponse[],
 	assets: AssetWithQuoteResponse[],

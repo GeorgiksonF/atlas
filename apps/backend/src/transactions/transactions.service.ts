@@ -56,6 +56,19 @@ export class TransactionsService {
 		return rows.map(transctionToResponse);
 	}
 
+	async findAllByPortfolioIdChronological(
+		portfolioId: string,
+		userId: string,
+	): Promise<TransactionsResponse> {
+		await this.ensurePortfolioAccess(portfolioId, userId);
+
+		const rows = await this.prisma.transaction.findMany({
+			where: { portfolioId },
+			orderBy: [{ date: 'asc' }, { createdAt: 'asc' }],
+		});
+		return rows.map(transctionToResponse);
+	}
+
 	async findById(
 		portfolioId: string,
 		transactionId: string,

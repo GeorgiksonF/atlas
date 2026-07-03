@@ -1,14 +1,15 @@
 import {
-	computePortfolioMetrics,
-	computeReturnMetrics,
-} from '@/portfolios/utils/portfolio-summary.calculator';
-import type { Flow } from '@/portfolios/utils/xirr';
-import {
 	createAsset,
 	createTransaction,
 	d,
 	resetFixtureCounters,
 } from '@test/fixtures/portfolio-summary.fixtures';
+
+import {
+	computePortfolioMetrics,
+	computeReturnMetrics,
+} from '@/portfolios/utils/portfolio-summary.calculator';
+import type { Flow } from '@/portfolios/utils/xirr';
 
 const MS_PER_YEAR = 365.25 * 24 * 60 * 60 * 1000;
 
@@ -71,7 +72,7 @@ describe('computeReturnMetrics', () => {
 		});
 
 		expect(result.annualizedReturnPercent).not.toBeNull();
-		expect(result.annualizedReturnPercent!).toBeCloseTo(10, 1);
+		expect(result.annualizedReturnPercent).toBeCloseTo(10, 1);
 	});
 
 	it('не изменяет переданный массив investorFlows', () => {
@@ -192,6 +193,42 @@ describe('computePortfolioMetrics', () => {
 		expect(metrics.marketValue).toBe(0);
 		expect(metrics.totalValue).toBe(110_000);
 		expect(metrics.profit).toBe(10_000);
+	});
+
+	it('даёт разные метрики при обратном порядке транзакций (desc vs asc)', () => {
+		const deposit = createTransaction({
+			type: 'DEPOSIT',
+			price: 100_000,
+			quantity: 1,
+			date: d('2024-01-01'),
+		});
+		const buy = createTransaction({
+			type: 'BUY',
+			assetId: ASSET_ID,
+			price: 5_000,
+			quantity: 10,
+			date: d('2024-02-01'),
+		});
+		const sell = createTransaction({
+			type: 'SELL',
+			assetId: ASSET_ID,
+			price: 6_000,
+			quantity: 10,
+			date: d('2024-03-01'),
+		});
+
+		const chronological = computePortfolioMetrics(
+			[deposit, buy, sell],
+			assets,
+		);
+		const reversed = computePortfolioMetrics([sell, buy, deposit], assets);
+
+		expect(chronological.cashBalance).toBe(110_000);
+		expect(chronological.totalValue).toBe(110_000);
+		expect(chronological.profit).toBe(10_000);
+
+		expect(reversed.profit).not.toBe(chronological.profit);
+		expect(Number.isNaN(reversed.profit)).toBe(true);
 	});
 
 	it('уменьшает кэш и чистые пополнения после вывода', () => {

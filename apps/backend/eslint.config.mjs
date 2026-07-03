@@ -24,19 +24,14 @@ export default tseslint.config(
 			sourceType: 'commonjs',
 			parserOptions: {
 				tsconfigRootDir: import.meta.dirname,
-				project: [
-					'./tsconfig.json',
-					'./tsconfig.eslint.json',
-					'./tsconfig.test.json',
-					'../../libs/types/tsconfig.json',
-				],
+				project: ['./tsconfig.eslint.json'],
 			},
 		},
 		settings: {
 			'import/resolver': {
 				typescript: {
 					alwaysTryTypes: true,
-					project: ['./tsconfig.json', './tsconfig.eslint.json'],
+					project: ['./tsconfig.eslint.json'],
 				},
 			},
 		},

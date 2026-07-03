@@ -1,10 +1,7 @@
 {
-	"extends": "./tsconfig.json",
+	"extends": "./tsconfig.test.json",
 	"compilerOptions": {
-		"paths": {
-			"@/*": ["src/*"],
-			"@test/*": ["test/*"]
-		}
+		"noEmit": true
 	},
 	"include": ["src/**/*.ts", "test/**/*.ts"],
 	"exclude": ["node_modules", "dist"]
