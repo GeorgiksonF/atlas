@@ -4,150 +4,162 @@ import type {
 	TransactionResponse,
 } from '@atlas/types';
 
-import { amountToRub, roundMoney, rubToUsd, yearsBetween } from './helper';
+import { amountToRub, roundMoney, rubToUsd } from './helper';
+import { computeXirr, type Flow } from './xirr';
+
+export type { Flow } from './xirr';
+export { computeXirr } from './xirr';
 
 type PositionState = { quantity: number; basisTransactionCostRub: number };
 
-export type Flow = { date: Date; cashFlow: number };
+type DepositWithdrawalAccumulator = {
+	investorFlows: Flow[];
+	netDepositsRub: number;
+	cashBalance?: number;
+};
 
-function mergeFlowsByDay(flows: Flow[]): Flow[] {
-	const cashFlowsByDay = new Map<string, Flow>();
-	for (const flow of flows) {
-		const dateKey = flow.date.toISOString().slice(0, 10);
-		const existingFlow = cashFlowsByDay.get(dateKey);
-		if (existingFlow) {
-			existingFlow.cashFlow += flow.cashFlow;
-		} else {
-			cashFlowsByDay.set(dateKey, {
-				date: new Date(flow.date),
-				cashFlow: flow.cashFlow,
-			});
-		}
-	}
-	return [...cashFlowsByDay.values()].sort(
-		(a, b) => a.date.getTime() - b.date.getTime(),
-	);
-}
+export const applyDepositOrWithdrawal = (
+	tx: TransactionResponse,
+	acc: DepositWithdrawalAccumulator,
+): boolean => {
+	const priceRub = amountToRub(tx.price, tx.currency);
 
-export function computeXirr(flows: Flow[]): number | null {
-	if (flows.length < 2) {
-		return null;
-	}
-
-	const sortedFlowsByDays = mergeFlowsByDay(flows);
-
-	const firstCashFlowDate = sortedFlowsByDays[0].date;
-
-	let hasPositiveFlow = false;
-	let hasNegativeFlow = false;
-
-	for (const flow of sortedFlowsByDays) {
-		if (flow.cashFlow > 0) {
-			hasPositiveFlow = true;
-		}
-		if (flow.cashFlow < 0) {
-			hasNegativeFlow = true;
-		}
+	if (tx.type === 'DEPOSIT') {
+		acc.netDepositsRub += priceRub;
+		acc.investorFlows.push({
+			date: tx.date,
+			cashFlow: -priceRub,
+		});
+		if (acc.cashBalance !== undefined) acc.cashBalance += priceRub;
+		return true;
+	} else if (tx.type === 'WITHDRAWAL') {
+		acc.netDepositsRub -= priceRub;
+		acc.investorFlows.push({
+			date: tx.date,
+			cashFlow: priceRub,
+		});
+		if (acc.cashBalance !== undefined) acc.cashBalance -= priceRub;
+		return true;
 	}
 
-	if (!hasPositiveFlow || !hasNegativeFlow) {
-		return null;
-	}
+	return false;
+};
 
-	function calculateNetPresentValue(annualRate: number): number {
-		let discountedSum = 0;
+type PortfolioSummary = {
+	totalValue: number;
+	marketValue: number;
+	cashBalance: number;
+	profit: number;
+	profitPercentOfNetInvested: number | null;
+	annualizedReturnPercent: number | null;
+};
 
-		for (const flow of sortedFlowsByDays) {
-			const yearsFromStart = yearsBetween(firstCashFlowDate, flow.date);
-			discountedSum +=
-				flow.cashFlow / Math.pow(1 + annualRate, yearsFromStart);
-		}
-
-		return discountedSum;
-	}
-
-	let rateLowerBound = -0.999999;
-	let rateUpperBound = 100;
-	let npvAtLowerBound = calculateNetPresentValue(rateLowerBound);
-	let npvAtUpperBound = calculateNetPresentValue(rateUpperBound);
-	let widenAttempts = 0;
-
-	while (npvAtLowerBound * npvAtUpperBound > 0 && widenAttempts < 25) {
-		rateUpperBound *= 2;
-		npvAtUpperBound = calculateNetPresentValue(rateUpperBound);
-		widenAttempts++;
-	}
-
-	if (npvAtLowerBound * npvAtUpperBound > 0) {
-		return null;
-	}
-
-	const maxBinarySearchIterations = 200;
-	const npvTolerance = 1e-7;
-
-	for (let i = 0; i < maxBinarySearchIterations; i++) {
-		const midpointRate = (rateLowerBound + rateUpperBound) / 2;
-		const npvAtMidpoint = calculateNetPresentValue(midpointRate);
-		if (Math.abs(npvAtMidpoint) < npvTolerance) {
-			return midpointRate;
-		}
-		if (npvAtLowerBound * npvAtMidpoint <= 0) {
-			rateUpperBound = midpointRate;
-			npvAtUpperBound = npvAtMidpoint;
-		} else {
-			rateLowerBound = midpointRate;
-			npvAtLowerBound = npvAtMidpoint;
-		}
-	}
-
-	return (rateLowerBound + rateUpperBound) / 2;
-}
-
-export function emptyPortfolioSummary(): PortfolioSummaryResponse {
+export const toPortfolioSummaryResponse = (
+	numbers: PortfolioSummary,
+): PortfolioSummaryResponse => {
 	return {
+		totalValue: roundMoney(numbers.totalValue),
+		marketValue: roundMoney(numbers.marketValue),
+		cashBalance: roundMoney(numbers.cashBalance),
+		profit: roundMoney(numbers.profit),
+		profitPercentOfNetInvested:
+			numbers.profitPercentOfNetInvested !== null
+				? roundMoney(numbers.profitPercentOfNetInvested)
+				: null,
+		annualizedReturnPercent:
+			numbers.annualizedReturnPercent !== null
+				? roundMoney(numbers.annualizedReturnPercent)
+				: null,
+		dayChangeAmount: 0,
+		dayChangePercent: null,
+		primaryCurrency: 'RUB',
+		alternativeCurrency: 'USD',
+		alternativeTotalValue: roundMoney(rubToUsd(numbers.totalValue)),
+	};
+};
+
+export const emptyPortfolioSummary = (): PortfolioSummaryResponse =>
+	toPortfolioSummaryResponse({
 		totalValue: 0,
 		marketValue: 0,
 		cashBalance: 0,
 		profit: 0,
 		profitPercentOfNetInvested: null,
 		annualizedReturnPercent: null,
-		dayChangeAmount: 0,
-		dayChangePercent: null,
-		primaryCurrency: 'RUB',
-		alternativeCurrency: 'USD',
-		alternativeTotalValue: 0,
-	};
-}
+	});
 
-// const applyTransactionsToLedger = (transactions: SummaryTransaction[]) => {};
+type ReturnMetricsInput = {
+	netDepositsRub: number;
+	profitRub: number;
+	investorFlows: Flow[];
+	terminalValue: number;
+};
 
-export function computePortfolioSummary(
+type ReturnMetrics = {
+	profitPercentOfNetInvested: number | null;
+	annualizedReturnPercent: number | null;
+};
+
+const NET_DEPOSITS_EPSILON = 1e-6;
+
+export const computeReturnMetrics = ({
+	netDepositsRub,
+	profitRub,
+	investorFlows,
+	terminalValue,
+}: ReturnMetricsInput): ReturnMetrics => {
+	const flowsForXirr: Flow[] = [
+		...investorFlows,
+		{ date: new Date(), cashFlow: terminalValue },
+	];
+
+	const xirr = computeXirr(flowsForXirr);
+
+	const annualizedReturnPercent =
+		xirr !== null && Number.isFinite(xirr) ? xirr * 100 : null;
+
+	const profitPercentOfNetInvested =
+		netDepositsRub > NET_DEPOSITS_EPSILON
+			? (profitRub / netDepositsRub) * 100
+			: null;
+
+	return { profitPercentOfNetInvested, annualizedReturnPercent };
+};
+
+type PortfolioMetrics = {
+	totalValue: number;
+	marketValue: number;
+	cashBalance: number;
+	profit: number;
+	netDepositsRub: number;
+	investorFlows: Flow[];
+};
+
+export const computePortfolioMetrics = (
 	transactions: TransactionResponse[],
 	assets: AssetWithQuoteResponse[],
-): PortfolioSummaryResponse {
+): PortfolioMetrics => {
 	if (!transactions.length) {
-		return emptyPortfolioSummary();
+		return {
+			totalValue: 0,
+			marketValue: 0,
+			cashBalance: 0,
+			profit: 0,
+			netDepositsRub: 0,
+			investorFlows: [],
+		};
 	}
 
-	let cashBalance = 0;
 	let realizedPnLRub = 0;
 	const positions = new Map<string, PositionState>();
-	let netDepositsRub = 0;
-	const investorFlows: Flow[] = [];
+	const acc = {
+		netDepositsRub: 0,
+		investorFlows: [] as Flow[],
+		cashBalance: 0,
+	};
 
 	for (const tx of transactions) {
-		const priceRub = amountToRub(tx.price, tx.currency);
-
-		if (tx.type === 'DEPOSIT') {
-			cashBalance += priceRub;
-			netDepositsRub += priceRub;
-			investorFlows.push({ date: tx.date, cashFlow: -priceRub });
-			continue;
-		}
-		if (tx.type === 'WITHDRAWAL') {
-			cashBalance -= priceRub;
-			netDepositsRub -= priceRub;
-			investorFlows.push({ date: tx.date, cashFlow: priceRub });
+		if (applyDepositOrWithdrawal(tx, acc)) {
 			continue;
 		}
 
@@ -165,7 +177,7 @@ export function computePortfolioSummary(
 				tx.price * tx.quantity,
 				tx.currency,
 			);
-			cashBalance -= transactionCostRub;
+			acc.cashBalance -= transactionCostRub;
 			const newQuantity = position.quantity + tx.quantity;
 			const newTransactionCost =
 				position.basisTransactionCostRub + transactionCostRub;
@@ -181,7 +193,7 @@ export function computePortfolioSummary(
 				tx.price * tx.quantity,
 				tx.currency,
 			);
-			cashBalance += saleProceedsRub;
+			acc.cashBalance += saleProceedsRub;
 			const avgCostPerUnitRub =
 				position.basisTransactionCostRub / position.quantity;
 			const soldPositionCostRub = avgCostPerUnitRub * tx.quantity;
@@ -196,11 +208,13 @@ export function computePortfolioSummary(
 		}
 	}
 
+	const assetsById = new Map(assets.map((asset) => [asset.id, asset]));
+
 	let openPositionsMarketValueRub = 0;
 	let openPositionsCostBasisRub = 0;
 	for (const [assetId, position] of positions) {
 		openPositionsCostBasisRub += position.basisTransactionCostRub;
-		const asset = assets.find((ast) => ast.id === assetId);
+		const asset = assetsById.get(assetId);
 		const assetQuote = asset?.quote
 			? amountToRub(asset.quote.price, asset.quote.currency)
 			: 1;
@@ -211,57 +225,98 @@ export function computePortfolioSummary(
 	const unrealizedPnLRub =
 		openPositionsMarketValueRub - openPositionsCostBasisRub;
 	const totalProfitRub = realizedPnLRub + unrealizedPnLRub;
-	const totalValueRub = cashBalance + openPositionsMarketValueRub;
-
-	investorFlows.push({ date: new Date(), cashFlow: totalValueRub });
-	const xirr = computeXirr(investorFlows);
-	const annualizedReturnPercent =
-		xirr !== null && Number.isFinite(xirr) ? xirr * 100 : null;
-
-	const profitPercentOfNetInvested =
-		netDepositsRub > 1e-6 ? (totalProfitRub / netDepositsRub) * 100 : null;
+	const totalValueRub = acc.cashBalance + openPositionsMarketValueRub;
 
 	return {
-		totalValue: roundMoney(totalValueRub),
-		marketValue: roundMoney(openPositionsMarketValueRub),
-		cashBalance: roundMoney(cashBalance),
-		profit: roundMoney(totalProfitRub),
-		profitPercentOfNetInvested:
-			profitPercentOfNetInvested !== null
-				? roundMoney(profitPercentOfNetInvested)
-				: null,
-		annualizedReturnPercent:
-			annualizedReturnPercent !== null
-				? roundMoney(annualizedReturnPercent)
-				: null,
-		dayChangeAmount: 0,
-		dayChangePercent: null,
-		primaryCurrency: 'RUB',
-		alternativeCurrency: 'USD',
-		alternativeTotalValue: roundMoney(rubToUsd(totalValueRub)),
+		totalValue: totalValueRub,
+		marketValue: openPositionsMarketValueRub,
+		cashBalance: acc.cashBalance,
+		profit: totalProfitRub,
+		netDepositsRub: acc.netDepositsRub,
+		investorFlows: acc.investorFlows,
 	};
-}
+};
 
-export function sumPortfoliosSummaries(
-	summaries: PortfolioSummaryResponse[],
+export const computePortfolioSummary = (
+	transactions: TransactionResponse[],
+	assets: AssetWithQuoteResponse[],
+): PortfolioSummaryResponse => {
+	if (!transactions.length) {
+		return emptyPortfolioSummary();
+	}
+
+	const metrics = computePortfolioMetrics(transactions, assets);
+
+	const returnMetrics = computeReturnMetrics({
+		netDepositsRub: metrics.netDepositsRub,
+		profitRub: metrics.profit,
+		investorFlows: metrics.investorFlows,
+		terminalValue: metrics.totalValue,
+	});
+
+	return toPortfolioSummaryResponse({
+		totalValue: metrics.totalValue,
+		marketValue: metrics.marketValue,
+		cashBalance: metrics.cashBalance,
+		profit: metrics.profit,
+		...returnMetrics,
+	});
+};
+
+export const sumPortfolioMetrics = (
+	metrics: PortfolioMetrics[],
 ): Pick<
-	PortfolioSummaryResponse,
-	'totalValue' | 'marketValue' | 'cashBalance' | 'profit' | 'dayChangeAmount'
-> {
-	return summaries.reduce(
-		(acc, s) => ({
-			totalValue: acc.totalValue + s.totalValue,
-			marketValue: acc.marketValue + s.marketValue,
-			cashBalance: acc.cashBalance + s.cashBalance,
-			profit: acc.profit + s.profit,
-			dayChangeAmount: acc.dayChangeAmount + s.dayChangeAmount,
+	PortfolioMetrics,
+	'totalValue' | 'marketValue' | 'cashBalance' | 'profit'
+> => {
+	return metrics.reduce(
+		(acc, m) => ({
+			totalValue: acc.totalValue + m.totalValue,
+			marketValue: acc.marketValue + m.marketValue,
+			cashBalance: acc.cashBalance + m.cashBalance,
+			profit: acc.profit + m.profit,
 		}),
 		{
 			totalValue: 0,
 			marketValue: 0,
 			cashBalance: 0,
 			profit: 0,
-			dayChangeAmount: 0,
 		},
 	);
-}
+};
+
+export const computeAggregatedPortfolioSummary = (
+	transactionsByPortfolio: TransactionResponse[][],
+	assets: AssetWithQuoteResponse[],
+): PortfolioSummaryResponse => {
+	if (transactionsByPortfolio.length === 0) {
+		return emptyPortfolioSummary();
+	}
+
+	const metricsList = transactionsByPortfolio.map((transactions) =>
+		computePortfolioMetrics(transactions, assets),
+	);
+
+	const sums = sumPortfolioMetrics(metricsList);
+
+	const netDepositsRub = metricsList.reduce(
+		(total, m) => total + m.netDepositsRub,
+		0,
+	);
+	const investorFlows = metricsList.flatMap((m) => m.investorFlows);
+
+	const returnMetrics = computeReturnMetrics({
+		netDepositsRub,
+		profitRub: sums.profit,
+		investorFlows,
+		terminalValue: sums.totalValue,
+	});
+
+	return toPortfolioSummaryResponse({
+		totalValue: sums.totalValue,
+		marketValue: sums.marketValue,
+		cashBalance: sums.cashBalance,
+		profit: sums.profit,
+		...returnMetrics,
+	});
+};

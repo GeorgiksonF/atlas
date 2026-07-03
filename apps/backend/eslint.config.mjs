@@ -27,6 +27,7 @@ export default tseslint.config(
 				project: [
 					'./tsconfig.json',
 					'./tsconfig.eslint.json',
+					'./tsconfig.test.json',
 					'../../libs/types/tsconfig.json',
 				],
 			},

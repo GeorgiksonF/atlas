@@ -6,13 +6,10 @@ import type { PortfolioSummaryResponse } from '@atlas/types';
 import { AssetsService } from '../assets/assets.service';
 import { TransactionsService } from '../transactions/transactions.service';
 import { portfolioWithTransactionToResponse } from './utils/adapters';
-import { amountToRub, roundMoney, rubToUsd } from './utils/helper';
 import {
+	computeAggregatedPortfolioSummary,
 	computePortfolioSummary,
-	computeXirr,
 	emptyPortfolioSummary,
-	type Flow,
-	sumPortfoliosSummaries,
 } from './utils/portfolio-summary.calculator';
 
 @Injectable()
@@ -65,59 +62,9 @@ export class PortfolioSummaryService {
 
 		const assets = await this.assetsService.findAllWithQuotes();
 
-		const summaries = portfolios.map((p) =>
-			computePortfolioSummary(p.transactions, assets),
+		return computeAggregatedPortfolioSummary(
+			portfolios.map((p) => p.transactions),
+			assets,
 		);
-
-		const sums = sumPortfoliosSummaries(summaries);
-
-		const investorFlows: Flow[] = [];
-		let netDepositsRub = 0;
-
-		for (const p of portfolios) {
-			for (const tx of p.transactions) {
-				if (tx.type === 'DEPOSIT') {
-					const cashFlow = amountToRub(tx.price, tx.currency);
-					netDepositsRub += cashFlow;
-					investorFlows.push({
-						date: tx.date,
-						cashFlow: -cashFlow,
-					});
-				} else if (tx.type === 'WITHDRAWAL') {
-					const cashFlow = amountToRub(tx.price, tx.currency);
-					netDepositsRub -= cashFlow;
-					investorFlows.push({
-						date: tx.date,
-						cashFlow: cashFlow,
-					});
-				}
-			}
-		}
-
-		investorFlows.push({ date: new Date(), cashFlow: sums.totalValue });
-		const xirr = computeXirr(investorFlows);
-		const annualizedReturnPercent =
-			xirr !== null && Number.isFinite(xirr)
-				? Math.round(xirr * 1e6) / 1e4
-				: null;
-
-		const profitPercentOfNetInvested =
-			netDepositsRub > 1e-6
-				? Math.round((sums.profit / netDepositsRub) * 1e6) / 1e4
-				: null;
-
-		return {
-			totalValue: roundMoney(sums.totalValue),
-			marketValue: roundMoney(sums.marketValue),
-			cashBalance: roundMoney(sums.cashBalance),
-			profit: roundMoney(sums.profit),
-			profitPercentOfNetInvested,
-			annualizedReturnPercent,
-			dayChangeAmount: 0,
-			dayChangePercent: null,
-			primaryCurrency: 'RUB',
-			alternativeCurrency: 'USD',
-			alternativeTotalValue: roundMoney(rubToUsd(sums.totalValue)),
-		};
 	}
 }
