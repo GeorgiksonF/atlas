@@ -1,4 +1,9 @@
-import type { MoexIssResponse, MoexIssTable } from './moex-iss.types';
+export type MoexIssTable = {
+	columns: string[];
+	data: unknown[][];
+};
+
+export type MoexIssResponse = Record<string, MoexIssTable | undefined>;
 
 export function parseIssBlock(
 	json: MoexIssResponse,

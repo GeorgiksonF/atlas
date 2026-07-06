@@ -21,7 +21,7 @@ export const assetsRepository = {
 	async search(query: string): Promise<AssetSearchItem[]> {
 		if (!query?.trim()) return [];
 		const { data } = await apiClient.get<AssetSearchItem[]>(
-			'/assets/search',
+			'/assets/import/search',
 			{ params: { q: query.trim() } },
 		);
 		return data ?? [];
@@ -29,7 +29,7 @@ export const assetsRepository = {
 
 	async ensureFromExchange(ticker: string): Promise<AssetWithQuoteResponse> {
 		const { data } = await apiClient.post<AssetWithQuoteResponse>(
-			'/assets/from-exchange',
+			'/assets/import/from-exchange',
 			{ ticker: ticker.trim() },
 		);
 		return data;

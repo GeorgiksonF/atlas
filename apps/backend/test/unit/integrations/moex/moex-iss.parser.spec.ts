@@ -2,9 +2,9 @@ import {
 	getCellValue,
 	getColumnIndex,
 	getFirstRow,
+	type MoexIssResponse,
 	parseIssBlock,
 } from '@/integrations/moex/moex-iss.parser';
-import type { MoexIssResponse } from '@/integrations/moex/moex-iss.types';
 
 describe('parseIssBlock', () => {
 	it('возвращает таблицу, если блок валиден', () => {

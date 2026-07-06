@@ -1,16 +1,13 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
 import { AuthModule } from '../auth/auth.module';
-import { QuotesModule } from '../quotes/quotes.module';
 import { AssetsController } from './assets.controller';
 import { AssetsService } from './assets.service';
-import { AssetsFromExchangeService } from './assets-from-exchange.service';
-import { MoexSearchService } from './moex-search.service';
 
 @Module({
-	imports: [AuthModule, forwardRef(() => QuotesModule)],
+	imports: [AuthModule],
 	controllers: [AssetsController],
-	providers: [AssetsService, MoexSearchService, AssetsFromExchangeService],
+	providers: [AssetsService],
 	exports: [AssetsService],
 })
 export class AssetsModule {}

@@ -7,15 +7,34 @@ import {
 	MOEX_QUOTE_ENGINE,
 	MOEX_QUOTE_MARKET,
 } from '../../../integrations/moex/moex.constants';
+import { moexCellToNumber } from '../../../integrations/moex/moex-cell.utils';
 import { MoexHttpClient } from '../../../integrations/moex/moex-http.client';
-import { parseIssBlock } from '../../../integrations/moex/moex-iss.parser';
-import type { MoexIssResponse } from '../../../integrations/moex/moex-iss.types';
-import { extractQuoteFromMarketdata } from '../../../integrations/moex/moex-quote.parser';
+import {
+	getCellValue,
+	getColumnIndex,
+	getFirstRow,
+	type MoexIssResponse,
+	type MoexIssTable,
+	parseIssBlock,
+} from '../../../integrations/moex/moex-iss.parser';
 import type { IQuoteProvider } from '../../contract/quote-provider.interface';
+
+const extractQuoteFromMarketdata = (
+	table: MoexIssTable,
+): { price: number } | null => {
+	const lastIdx = getColumnIndex(table.columns, 'LAST');
+	const row = getFirstRow(table);
+	if (!row) return null;
+
+	const price = moexCellToNumber(getCellValue(row, lastIdx));
+	if (price === null || price <= 0) return null;
+
+	return { price };
+};
 
 @Injectable()
 export class MoexQuoteProvider implements IQuoteProvider {
-	private readonly client = new MoexHttpClient();
+	constructor(private readonly client: MoexHttpClient) {}
 
 	async getQuotes(tickers: string[]): Promise<QuoteProviderItem[]> {
 		const results: QuoteProviderItem[] = [];

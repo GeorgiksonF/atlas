@@ -1,22 +1,33 @@
 import { Injectable } from '@nestjs/common';
 
-import type { AssetSearchItem } from '@atlas/types';
+import type { AssetSearchItem, AssetType } from '@atlas/types';
 
-import { mapMoexTypeToAssetType } from '../integrations/moex/moex-asset-type.mapper';
-import { moexCellToString } from '../integrations/moex/moex-cell.utils';
-import { MoexHttpClient } from '../integrations/moex/moex-http.client';
+import { moexCellToString } from './moex-cell.utils';
+import { MoexHttpClient } from './moex-http.client';
 import {
 	getCellValue,
 	getColumnIndex,
+	type MoexIssResponse,
 	parseIssBlock,
-} from '../integrations/moex/moex-iss.parser';
-import type { MoexIssResponse } from '../integrations/moex/moex-iss.types';
+} from './moex-iss.parser';
 
 const SEARCH_LIMIT = 20;
 
+const MOEX_TYPE_TO_ASSET: Record<string, AssetType> = {
+	common_share: 'STOCK',
+	preferred_share: 'STOCK',
+	exchange_bond: 'BOND',
+	corporate_bond: 'BOND',
+	stock_index_pf: 'FUND',
+	stock_index_if: 'FUND',
+};
+
+const mapMoexTypeToAssetType = (moexType: string): AssetType =>
+	MOEX_TYPE_TO_ASSET[moexType] ?? 'STOCK';
+
 @Injectable()
 export class MoexSearchService {
-	private readonly client = new MoexHttpClient();
+	constructor(private readonly client: MoexHttpClient) {}
 
 	async search(query: string): Promise<AssetSearchItem[]> {
 		const q = query.trim();

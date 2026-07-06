@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 
 import { AssetsModule } from './assets/assets.module';
+import { AssetsImportModule } from './assets-import/assets-import.module';
 import { AuthModule } from './auth/auth.module';
 import { PortfoliosModule } from './portfolios/portfolios.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -22,6 +23,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 		AuthModule,
 		PortfoliosModule,
 		AssetsModule,
+		AssetsImportModule,
 		QuotesModule,
 		TransactionsModule,
 	],
