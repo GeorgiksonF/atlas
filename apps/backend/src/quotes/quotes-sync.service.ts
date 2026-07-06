@@ -1,19 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 
-import { PrismaClient } from '@atlas/database';
-
 import { AssetsService } from '../assets/assets.service';
 import {
 	IQuoteProvider,
 	QUOTE_PROVIDER,
 } from './contract/quote-provider.interface';
+import { QuoteRepository } from './persistence/quote.repository';
 
 @Injectable()
 export class QuotesSyncService {
 	constructor(
-		private readonly prisma: PrismaClient,
 		private readonly assetsService: AssetsService,
+		private readonly quoteRepository: QuoteRepository,
 		@Inject(QUOTE_PROVIDER) private readonly quoteProvider: IQuoteProvider,
 	) {}
 
@@ -31,17 +30,9 @@ export class QuotesSyncService {
 		for (const q of quotes) {
 			const asset = tickerToAsset.get(q.ticker);
 			if (!asset) continue;
-			await this.prisma.quote.upsert({
-				where: { assetId: asset.id },
-				create: {
-					assetId: asset.id,
-					price: q.price,
-					currency: 'RUB',
-				},
-				update: {
-					price: q.price,
-					currency: 'RUB',
-				},
+			await this.quoteRepository.upsertForAsset(asset.id, {
+				price: q.price,
+				currency: q.currency,
 			});
 		}
 	}

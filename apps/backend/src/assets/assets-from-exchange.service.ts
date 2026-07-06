@@ -10,6 +10,7 @@ import type { AssetWithQuoteResponse, QuoteProviderItem } from '@atlas/types';
 
 import type { IQuoteProvider } from '../quotes/contract/quote-provider.interface';
 import { QUOTE_PROVIDER } from '../quotes/contract/quote-provider.interface';
+import { QuoteRepository } from '../quotes/persistence/quote.repository';
 import { MoexSearchService } from './moex-search.service';
 import { assetWithQuotesToResponse } from './utils/adapters';
 
@@ -18,6 +19,7 @@ export class AssetsFromExchangeService {
 	constructor(
 		private readonly prisma: PrismaClient,
 		private readonly moexSearch: MoexSearchService,
+		private readonly quoteRepository: QuoteRepository,
 		@Inject(QUOTE_PROVIDER) private readonly quoteProvider: IQuoteProvider,
 	) {}
 
@@ -72,17 +74,9 @@ export class AssetsFromExchangeService {
 		const quotes = await this.quoteProvider.getQuotes([asset.ticker]);
 		const quoteItem: QuoteProviderItem | undefined = quotes[0];
 		if (quoteItem) {
-			await this.prisma.quote.upsert({
-				where: { assetId: asset.id },
-				create: {
-					assetId: asset.id,
-					price: quoteItem.price,
-					currency: quoteItem.currency,
-				},
-				update: {
-					price: quoteItem.price,
-					currency: quoteItem.currency,
-				},
+			await this.quoteRepository.upsertForAsset(asset.id, {
+				price: quoteItem.price,
+				currency: quoteItem.currency,
 			});
 
 			return {
