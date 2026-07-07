@@ -1,5 +1,6 @@
 import {
 	BadRequestException,
+	ConflictException,
 	Injectable,
 	UnauthorizedException,
 } from '@nestjs/common';
@@ -7,9 +8,10 @@ import { JwtService } from '@nestjs/jwt';
 
 import { PrismaClient } from '@atlas/database';
 import type {
+	AuthResponse,
 	LoginRequest,
 	RegisterRequest,
-	RegisterResponse,
+	User,
 } from '@atlas/types';
 
 import * as bcrypt from 'bcrypt';
@@ -23,13 +25,30 @@ export class AuthService {
 		private readonly jwtService: JwtService,
 	) {}
 
-	async register(registerDto: RegisterRequest) {
+	private buildAuthResponse(user: {
+		id: string;
+		email: string;
+		name: string;
+	}): AuthResponse {
+		const payload = { email: user.email, sub: user.id };
+		const accessToken = this.jwtService.sign(payload);
+
+		const authUser: User = {
+			id: user.id,
+			email: user.email,
+			name: user.name,
+		};
+
+		return { accessToken, user: authUser };
+	}
+
+	async register(registerDto: RegisterRequest): Promise<AuthResponse> {
 		const existingUser = await this.prisma.user.findUnique({
 			where: { email: registerDto.email },
 		});
 
 		if (existingUser) {
-			throw new UnauthorizedException(
+			throw new ConflictException(
 				AUTH_ERROR_MESSAGES.USER_ALREADY_EXISTS,
 			);
 		}
@@ -50,21 +69,10 @@ export class AuthService {
 			},
 		});
 
-		const payload = { email: user.email, sub: user.id };
-		const token = this.jwtService.sign(payload);
-
-		const response: RegisterResponse = {
-			user: {
-				id: user.id,
-				email: user.email,
-				name: user.name,
-			},
-			token,
-		};
-		return response;
+		return this.buildAuthResponse(user);
 	}
 
-	async login(loginDto: LoginRequest) {
+	async login(loginDto: LoginRequest): Promise<AuthResponse> {
 		const user = await this.prisma.user.findUnique({
 			where: { email: loginDto.email },
 		});
@@ -86,16 +94,6 @@ export class AuthService {
 			);
 		}
 
-		const payload = { email: user.email, sub: user.id };
-		const token = this.jwtService.sign(payload);
-
-		return {
-			access_token: token,
-			user: {
-				id: user.id,
-				name: user.name,
-				email: user.email,
-			},
-		};
+		return this.buildAuthResponse(user);
 	}
 }

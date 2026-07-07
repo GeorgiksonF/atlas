@@ -1,103 +1,61 @@
 <template>
-  <div class="mt-10 flex flex-col gap-4">
-    <form
-      id="login-form"
-      class="flex flex-col gap-4"
-      @submit="onSubmit"
-    >
-      <div class="flex flex-col gap-1 w-full">
-        <InputGroup class="w-full">
-          <InputGroupAddon>
-            <i class="pi pi-envelope" />
-          </InputGroupAddon>
-          <FloatLabel
-            class="block w-full flex-1"
-            variant="on"
-          >
-            <InputText
-              id="login-email"
-              v-model="emailValue"
-              type="email"
-              class="w-full"
-              :invalid="!!emailError"
-              @blur="emailBlur"
-            />
-            <label for="login-email">Email</label>
-          </FloatLabel>
-        </InputGroup>
-        <Message
-          v-if="emailError"
-          severity="error"
-          class="w-full"
-          variant="simple"
-        >
-          {{
-            emailErrorText
-          }}
-        </Message>
-      </div>
-      <div class="flex flex-col gap-1 w-full">
-        <InputGroup class="w-full">
-          <InputGroupAddon>
-            <i class="pi pi-lock" />
-          </InputGroupAddon>
-          <FloatLabel
-            class="block w-full flex-1"
-            variant="on"
-          >
-            <Password
-              v-model="passwordValue"
-              input-id="login-password"
-              :invalid="!!passwordError"
-              :feedback="false"
-              toggle-mask
-              fluid
-              @blur="passwordBlur"
-            />
-            <label for="login-password">Пароль</label>
-          </FloatLabel>
-        </InputGroup>
-        <Message
-          v-if="passwordError"
-          severity="error"
-          class="w-full"
-          variant="simple"
-        >
-          {{
-            passwordErrorText
-          }}
-        </Message>
-      </div>
-      <Message
-        v-if="submitError"
-        severity="error"
-        class="w-full"
-        variant="simple"
-      >
-        {{
-          submitError
-        }}
-      </Message>
-      <Button
-        type="submit"
-        :loading="loading"
-        :disabled="loading"
-      >
-        Войти
-      </Button>
-    </form>
-    <div class="flex flex-col">
-      <p>Нет аккаунта?</p>
-      <Button
-        severity="secondary"
-        class="mt-2"
-        type="button"
-        @click="emit('open-register')"
-      >
-        Зарегистрироваться
-      </Button>
-    </div>
-  </div>
+	<div class="mt-10 flex flex-col gap-4">
+		<form id="login-form" class="flex flex-col gap-4" @submit="onSubmit">
+			<div class="flex flex-col gap-1 w-full">
+				<InputGroup class="w-full">
+					<InputGroupAddon>
+						<i class="pi pi-envelope" />
+					</InputGroupAddon>
+					<FloatLabel class="block w-full flex-1" variant="on">
+						<InputText
+							id="login-email"
+							v-model="emailValue"
+							type="email"
+							class="w-full"
+							:invalid="!!emailError"
+							@blur="emailBlur"
+						/>
+						<label for="login-email">Email</label>
+					</FloatLabel>
+				</InputGroup>
+				<Message v-if="emailError" severity="error" class="w-full" variant="simple">
+					{{ emailErrorText }}
+				</Message>
+			</div>
+			<div class="flex flex-col gap-1 w-full">
+				<InputGroup class="w-full">
+					<InputGroupAddon>
+						<i class="pi pi-lock" />
+					</InputGroupAddon>
+					<FloatLabel class="block w-full flex-1" variant="on">
+						<Password
+							v-model="passwordValue"
+							input-id="login-password"
+							:invalid="!!passwordError"
+							:feedback="false"
+							toggle-mask
+							fluid
+							@blur="passwordBlur"
+						/>
+						<label for="login-password">Пароль</label>
+					</FloatLabel>
+				</InputGroup>
+				<Message v-if="passwordError" severity="error" class="w-full" variant="simple">
+					{{ passwordErrorText }}
+				</Message>
+			</div>
+			<Message v-if="submitError" severity="error" class="w-full" variant="simple">
+				{{ submitError }}
+			</Message>
+			<Button type="submit" :loading="loading" :disabled="loading"> Войти </Button>
+		</form>
+		<div class="flex flex-col">
+			<p>Нет аккаунта?</p>
+			<Button severity="secondary" class="mt-2" type="button" @click="emit('open-register')">
+				Зарегистрироваться
+			</Button>
+		</div>
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -108,26 +66,32 @@ import { getErrorMessage } from '@/shared/api/errorMessage';
 import { useAppToast } from '@utils';
 
 import { toTypedSchema } from '@vee-validate/zod';
-import { useField,useForm } from 'vee-validate';
+import { useField, useForm } from 'vee-validate';
 
 import { authRepository } from '../api/authRepository';
 import { login } from '../constants/messages';
-import { type LoginFormValues,loginSchema } from '../schemas/loginSchema';
+import { type LoginFormValues, loginSchema } from '../schemas/loginSchema';
 import { useAuthStore } from '../stores/authStore';
 
 const router = useRouter();
 const emit = defineEmits<{ 'open-register': [] }>();
-const toast = useAppToast()
+const toast = useAppToast();
 
 const { handleSubmit } = useForm({
 	validationSchema: toTypedSchema(loginSchema),
 	initialValues: { email: '', password: '' },
 });
 
-const { value: emailValue, errorMessage: emailError, handleBlur: emailBlur } =
-	useField<LoginFormValues['email']>('email');
-const { value: passwordValue, errorMessage: passwordError, handleBlur: passwordBlur } =
-	useField<LoginFormValues['password']>('password');
+const {
+	value: emailValue,
+	errorMessage: emailError,
+	handleBlur: emailBlur,
+} = useField<LoginFormValues['email']>('email');
+const {
+	value: passwordValue,
+	errorMessage: passwordError,
+	handleBlur: passwordBlur,
+} = useField<LoginFormValues['password']>('password');
 
 const emailErrorText = computed(() => String(emailError.value ?? ''));
 const passwordErrorText = computed(() => String(passwordError.value ?? ''));
@@ -144,7 +108,7 @@ async function onLogin(values: LoginFormValues): Promise<void> {
 
 	try {
 		const response = await authRepository.login(values);
-		authStore.setToken(response.access_token);
+		authStore.setToken(response.accessToken);
 		authStore.setUser(response.user);
 		toast.success(login.toastSuccessSummary);
 		await router.push({ name: 'portfolio' });

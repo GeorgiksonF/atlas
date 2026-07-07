@@ -1,10 +1,5 @@
 <template>
-	<AppDialog
-		v-model:visible="isOpen"
-		class="w-1/5"
-		title="Регистрация"
-		@after-hide="resetForm"
-	>
+	<AppDialog v-model:visible="isOpen" class="w-1/5" title="Регистрация" @after-hide="resetForm">
 		<form id="register-form" class="flex flex-col gap-4 w-full pt-4" @submit.prevent="onSubmit">
 			<div class="flex flex-col gap-1 w-full">
 				<InputGroup class="w-full">
@@ -121,11 +116,11 @@ import AppDialog from '@/shared/components/AppDialog.vue';
 import { useAppToast } from '@utils';
 
 import { toTypedSchema } from '@vee-validate/zod';
-import { useField,useForm } from 'vee-validate';
+import { useField, useForm } from 'vee-validate';
 
 import { authRepository } from '../api/authRepository';
 import { register } from '../constants/messages';
-import { type RegisterFormValues,registerSchema } from '../schemas/registerSchema';
+import { type RegisterFormValues, registerSchema } from '../schemas/registerSchema';
 import { useAuthStore } from '../stores/authStore';
 
 const router = useRouter();
@@ -212,7 +207,7 @@ async function onRegister(values: {
 	loading.value = true;
 	try {
 		const response = await authRepository.register(values);
-		authStore.setToken(response.token);
+		authStore.setToken(response.accessToken);
 		authStore.setUser(response.user);
 		toast.success(register.toastSuccessSummary);
 		close();
