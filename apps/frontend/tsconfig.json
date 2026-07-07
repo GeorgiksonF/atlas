@@ -17,7 +17,6 @@
 			"@features/*": ["./src/features/*"],
 			"@entities/*": ["./src/entities/*"],
 			"@utils": ["./src/shared/utils"],
-			"@composables": ["./src/shared/composables"],
 			"@components": ["./src/shared/components"]
 		}
 	},

@@ -6,7 +6,7 @@ import { useAppToast } from '@utils';
 
 import type { MenuItem } from 'primevue/menuitem';
 
-export function useAppQuickActions(): { quickActions: MenuItem[] } {
+export function useSidebarQuickActions(): { quickActions: MenuItem[] } {
 	const router = useRouter();
 	const addTransactionModalStore = useAddTransactionModalStore();
 	const store = usePortfoliosStore();

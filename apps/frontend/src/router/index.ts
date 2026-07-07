@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import { useAuthStore } from '@/features/auth/stores/authStore';
-import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore.ts';
 
 import LandingView from '../views/LandingView.vue';
 import LoginView from '../views/LoginView.vue';
@@ -24,15 +23,6 @@ const router = createRouter({
 			path: '/app',
 			name: 'app',
 			meta: { requiresAuth: true },
-			async beforeEnter() {
-				const store = usePortfoliosStore();
-				try {
-					await store.fetchPortfolios();
-					await store.fetchBrokers();
-				} catch {
-					store.setLoadError('Не удалось загрузить портфели');
-				}
-			},
 			component: () => import('../views/AppLayout.vue'),
 			redirect: { name: 'portfolio' },
 			children: [

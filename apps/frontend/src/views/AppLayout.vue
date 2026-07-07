@@ -18,6 +18,15 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
+
+import { usePortfoliosBootstrap } from '@/features/portfolios/composables/usePortfoliosBootstrap';
 import { AppGlobalModals, AppSidebar, AppTopPanel } from '@widgets';
 import { PortfolioSidebar } from '@widgets/portfolios';
+
+const { bootstrapPortfolios } = usePortfoliosBootstrap();
+
+onMounted(() => {
+	void bootstrapPortfolios();
+});
 </script>

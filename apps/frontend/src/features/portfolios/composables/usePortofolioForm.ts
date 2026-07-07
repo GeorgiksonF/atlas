@@ -16,6 +16,7 @@ interface Props {
 	portfolio?: MaybeRefOrGetter<PortfolioContext | null>;
 	submit: (res: PortfolioForm) => Promise<PortfolioResponse>;
 	onSuccess?: () => void;
+	successMessage: string;
 }
 
 const portfolioInitial = (): PortfolioForm => ({
@@ -25,7 +26,7 @@ const portfolioInitial = (): PortfolioForm => ({
 });
 
 export const usePortfolioForm = (props: Props) => {
-	const { portfolio, submit, onSuccess } = props;
+	const { portfolio, submit, onSuccess, successMessage } = props;
 
 	const toast = useAppToast();
 	const store = usePortfoliosStore();
@@ -43,7 +44,7 @@ export const usePortfolioForm = (props: Props) => {
 			await submit(form);
 			await store.fetchPortfolios();
 			onSuccess?.();
-			toast.success('Портфель создан');
+			toast.success(successMessage);
 		} catch (err) {
 			toast.error(getErrorMessage(err, 'Не удалось изменить портфель'));
 		} finally {

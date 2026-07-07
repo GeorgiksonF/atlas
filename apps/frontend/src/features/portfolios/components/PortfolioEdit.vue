@@ -71,7 +71,7 @@ import type { PortfolioContext } from '@entities/portfolios';
 
 import { portfoliosRepository } from '../api/portfoliosRepository';
 import { usePortfolioForm } from '../composables/usePortofolioForm.ts';
-import { portfolioResponseToContext, portoflioFormToUpdate } from '../constants/adapters.ts';
+import { portfolioFormToUpdate, portfolioResponseToContext } from '../constants/adapters.ts';
 import { PortfolioForm } from '../schemas/portfolioFormSchemas.ts';
 import PortfolioEdititonGeneral from './portfolio-edition/PortfolioEdititonGeneral.vue';
 
@@ -89,10 +89,10 @@ const portfolioId = computed(() => {
 });
 
 const submit = async (form: PortfolioForm) => {
-	return await portfoliosRepository.update(toValue(portfolioId), portoflioFormToUpdate(form));
+	return await portfoliosRepository.update(toValue(portfolioId), portfolioFormToUpdate(form));
 };
 
-const loadPortfoliio = async () => {
+const loadPortfolio = async () => {
 	isPortfolioFetching.value = true;
 	try {
 		const res = await portfoliosRepository.getById(portfolioId.value);
@@ -112,7 +112,8 @@ const {
 	portfolio,
 	submit,
 	onSuccess: () => router.push({ name: 'portfolioManagement' }),
+	successMessage: 'Портфель сохранён',
 });
 
-watch(portfolioId, loadPortfoliio, { immediate: true });
+watch(portfolioId, loadPortfolio, { immediate: true });
 </script>

@@ -4,14 +4,14 @@ import type { PortfolioContext } from '@entities/portfolios';
 
 import { PortfolioForm } from '../schemas/portfolioFormSchemas';
 
-export const portoflioFormToCreate = (form: PortfolioForm): CreatePortfolio => ({
+export const portfolioFormToCreate = (form: PortfolioForm): CreatePortfolio => ({
 	name: form.name,
 	description: undefined,
 	category: form.category ?? undefined,
 	broker: form.broker ?? undefined,
 });
 
-export const portoflioFormToUpdate = (form: PortfolioForm): UpdatePortfolio => ({
+export const portfolioFormToUpdate = (form: PortfolioForm): UpdatePortfolio => ({
 	name: form.name ?? undefined,
 	description: undefined,
 	category: form.category ?? undefined,
