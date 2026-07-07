@@ -4,7 +4,6 @@ import {
 	createTransaction,
 	d,
 	resetFixtureCounters,
-	TEST_USD_TO_RUB,
 } from '@test/fixtures/portfolio-summary.fixtures';
 
 import {

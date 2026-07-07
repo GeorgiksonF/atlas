@@ -6,30 +6,30 @@ import {
 	Param,
 	Patch,
 	Post,
-	Request,
-	UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import {
 	CreateTransactionDto,
 	UpdateTransactionDto,
 } from './dto/transaction.dto';
 import { TransactionsService } from './transactions.service';
 
+@ApiTags('transactions')
+@ApiBearerAuth()
 @Controller('portfolios/:portfolioId/transactions')
-@UseGuards(JwtAuthGuard)
 export class TransactionsController {
 	constructor(private readonly transactionsService: TransactionsService) {}
 
 	@Get()
 	findAll(
 		@Param('portfolioId') portfolioId: string,
-		@Request() req: { user: { userId: string } },
+		@CurrentUser('userId') userId: string,
 	) {
 		return this.transactionsService.findAllByPortfolioId(
 			portfolioId,
-			req.user.userId,
+			userId,
 		);
 	}
 
@@ -37,22 +37,18 @@ export class TransactionsController {
 	findOne(
 		@Param('portfolioId') portfolioId: string,
 		@Param('id') id: string,
-		@Request() req: { user: { userId: string } },
+		@CurrentUser('userId') userId: string,
 	) {
-		return this.transactionsService.findById(
-			portfolioId,
-			id,
-			req.user.userId,
-		);
+		return this.transactionsService.findById(portfolioId, id, userId);
 	}
 
 	@Post()
 	create(
 		@Param('portfolioId') portfolioId: string,
-		@Request() req: { user: { userId: string } },
+		@CurrentUser('userId') userId: string,
 		@Body() body: CreateTransactionDto,
 	) {
-		return this.transactionsService.create(portfolioId, req.user.userId, {
+		return this.transactionsService.create(portfolioId, userId, {
 			...body,
 			assetId: body.assetId ?? null,
 		});
@@ -62,23 +58,18 @@ export class TransactionsController {
 	update(
 		@Param('portfolioId') portfolioId: string,
 		@Param('id') id: string,
-		@Request() req: { user: { userId: string } },
+		@CurrentUser('userId') userId: string,
 		@Body() body: UpdateTransactionDto,
 	) {
-		return this.transactionsService.update(
-			portfolioId,
-			id,
-			req.user.userId,
-			body,
-		);
+		return this.transactionsService.update(portfolioId, id, userId, body);
 	}
 
 	@Delete(':id')
 	async delete(
 		@Param('portfolioId') portfolioId: string,
 		@Param('id') id: string,
-		@Request() req: { user: { userId: string } },
+		@CurrentUser('userId') userId: string,
 	) {
-		await this.transactionsService.delete(portfolioId, id, req.user.userId);
+		await this.transactionsService.delete(portfolioId, id, userId);
 	}
 }

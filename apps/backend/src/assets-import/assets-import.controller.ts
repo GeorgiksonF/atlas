@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { IsNotEmpty, IsString } from 'class-validator';
 
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MoexSearchService } from '../integrations/moex/moex-search.service';
 import { AssetsFromExchangeService } from './assets-from-exchange.service';
 
@@ -12,8 +12,9 @@ class EnsureFromExchangeDto {
 	ticker: string;
 }
 
+@ApiTags('assets-import')
+@ApiBearerAuth()
 @Controller('assets/import')
-@UseGuards(JwtAuthGuard)
 export class AssetsImportController {
 	constructor(
 		private readonly moexSearch: MoexSearchService,

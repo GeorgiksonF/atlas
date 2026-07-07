@@ -1,10 +1,11 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AssetsService } from './assets.service';
 
+@ApiTags('assets')
+@ApiBearerAuth()
 @Controller('assets')
-@UseGuards(JwtAuthGuard)
 export class AssetsController {
 	constructor(private readonly assetsService: AssetsService) {}
 

@@ -6,17 +6,17 @@ import {
 	Param,
 	Patch,
 	Post,
-	Request,
-	UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CreatePortfolioDto, UpdatePortfolioDto } from './dto/portfolio.dto';
 import { PortfolioSummaryService } from './portfolio-summary.service';
 import { PortfoliosService } from './portfolios.service';
 
+@ApiTags('portfolios')
+@ApiBearerAuth()
 @Controller('portfolios')
-@UseGuards(JwtAuthGuard)
 export class PortfoliosController {
 	constructor(
 		private readonly portfoliosService: PortfoliosService,
@@ -24,8 +24,8 @@ export class PortfoliosController {
 	) {}
 
 	@Get()
-	getPortfolios(@Request() req: { user: { userId: string } }) {
-		return this.portfoliosService.findAllByUserId(req.user.userId);
+	getPortfolios(@CurrentUser('userId') userId: string) {
+		return this.portfoliosService.findAllByUserId(userId);
 	}
 
 	@Get('brokers')
@@ -34,53 +34,47 @@ export class PortfoliosController {
 	}
 
 	@Get('summary/all')
-	getSummaryAll(@Request() req: { user: { userId: string } }) {
+	getSummaryAll(@CurrentUser('userId') userId: string) {
 		return this.portfolioSummaryService.getSummaryForAllUserPortfolios(
-			req.user.userId,
+			userId,
 		);
 	}
 
 	@Get(':id/summary')
 	getPortfolioSummary(
 		@Param('id') id: string,
-		@Request() req: { user: { userId: string } },
+		@CurrentUser('userId') userId: string,
 	) {
-		return this.portfolioSummaryService.getSummaryForPortfolio(
-			id,
-			req.user.userId,
-		);
+		return this.portfolioSummaryService.getSummaryForPortfolio(id, userId);
 	}
 
 	@Get(':id')
-	getById(
-		@Param('id') id: string,
-		@Request() req: { user: { userId: string } },
-	) {
-		return this.portfoliosService.findById(id, req.user.userId);
+	getById(@Param('id') id: string, @CurrentUser('userId') userId: string) {
+		return this.portfoliosService.findById(id, userId);
 	}
 
 	@Post()
 	create(
-		@Request() req: { user: { userId: string } },
+		@CurrentUser('userId') userId: string,
 		@Body() body: CreatePortfolioDto,
 	) {
-		return this.portfoliosService.create(req.user.userId, body);
+		return this.portfoliosService.create(userId, body);
 	}
 
 	@Patch(':id')
 	update(
 		@Param('id') id: string,
-		@Request() req: { user: { userId: string } },
+		@CurrentUser('userId') userId: string,
 		@Body() body: UpdatePortfolioDto,
 	) {
-		return this.portfoliosService.update(id, req.user.userId, body);
+		return this.portfoliosService.update(id, userId, body);
 	}
 
 	@Delete(':id')
 	async delete(
 		@Param('id') id: string,
-		@Request() req: { user: { userId: string } },
+		@CurrentUser('userId') userId: string,
 	) {
-		await this.portfoliosService.delete(id, req.user.userId);
+		await this.portfoliosService.delete(id, userId);
 	}
 }
