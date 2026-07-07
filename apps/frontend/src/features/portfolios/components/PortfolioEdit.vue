@@ -43,7 +43,7 @@
 				</TabList>
 				<TabPanels :pt="{ root: { class: '!bg-slate-800 rounded-b-lg' } }">
 					<TabPanel value="general" :pt="{ root: { class: '!bg-slate-800' } }">
-						<PortfolioEdititonGeneral />
+						<PortfolioEditionGeneral />
 					</TabPanel>
 				</TabPanels>
 			</Tabs>
@@ -66,7 +66,7 @@ import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { useEditPortfolioForm } from '../composables/useEditPortfolioForm';
-import PortfolioEdititonGeneral from './portfolio-edition/PortfolioEdititonGeneral.vue';
+import PortfolioEditionGeneral from './portfolio-edition/PortfolioEditionGeneral.vue';
 
 const router = useRouter();
 const route = useRoute();

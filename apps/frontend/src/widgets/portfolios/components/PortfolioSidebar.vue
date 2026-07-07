@@ -1,7 +1,7 @@
 <template>
 	<Transition name="portfolio-sidebar-fade">
 		<aside
-			v-if="store.isPortfolioSidebarOpen"
+			v-if="portfolioUiStore.isPortfolioSidebarOpen"
 			ref="asideRoot"
 			class="absolute left-0 top-0 bottom-0 z-10 flex w-90 flex-col border-r border-slate-600 bg-slate-900"
 		>
@@ -46,20 +46,19 @@ import {
 	usePortfolioDeleteConfirm,
 	usePortfolioMenuItems,
 	usePortfoliosStore,
+	usePortfolioUiStore,
 } from '@features/portfolios';
 
 import { onClickOutside } from '@vueuse/core';
 
 import PortfolioAddButton from './PortfolioAddButton.vue';
 
-
-
-
 const store = usePortfoliosStore();
+const portfolioUiStore = usePortfolioUiStore();
 const { confirmDeletePortfolio } = usePortfolioDeleteConfirm({
 	afterSuccess: () => {
-		if (store.isPortfolioSidebarOpen) {
-			store.togglePortfolioSidebar();
+		if (portfolioUiStore.isPortfolioSidebarOpen) {
+			portfolioUiStore.closePortfolioSidebar();
 		}
 	},
 });
@@ -68,13 +67,13 @@ const { getPortfolioMenuItems } = usePortfolioMenuItems(confirmDeletePortfolio);
 const isInvestmentsExpanded = ref(true);
 const asideRoot = ref<HTMLElement | null>(null);
 
-onClickOutside(asideRoot, () => store.togglePortfolioSidebar(), {
+onClickOutside(asideRoot, () => portfolioUiStore.closePortfolioSidebar(), {
 	ignore: ['.portfolio-sidebar-trigger', '[data-pc-name="menu"]'],
 });
 
 const selectPortfolio = (id: string) => {
 	store.setActivePortfolio(id);
-	store.togglePortfolioSidebar();
+	portfolioUiStore.closePortfolioSidebar();
 };
 </script>
 

@@ -8,13 +8,13 @@
 			</StepList>
 			<StepPanels>
 				<StepPanel :value="STEPS.TYPE">
-					<PortrfolioCreationChooseCategory />
+					<PortfolioCreationChooseCategory />
 				</StepPanel>
 				<StepPanel :value="STEPS.BROKER">
-					<PortrfolioCreationChooseBroker />
+					<PortfolioCreationChooseBroker />
 				</StepPanel>
 				<StepPanel :value="STEPS.NAME">
-					<PortrfolioCreationName />
+					<PortfolioCreationName />
 				</StepPanel>
 			</StepPanels>
 		</Stepper>
@@ -51,9 +51,9 @@
 import { computed, ref } from 'vue';
 
 import { useCreatePortfolioForm } from '../composables/useCreatePortfolioForm';
-import PortrfolioCreationChooseBroker from './portfolio-creation/PortrfolioCreationChooseBroker.vue';
-import PortrfolioCreationChooseCategory from './portfolio-creation/PortrfolioCreationChooseCategory.vue';
-import PortrfolioCreationName from './portfolio-creation/PortrfolioCreationName.vue';
+import PortfolioCreationChooseBroker from './portfolio-creation/PortfolioCreationChooseBroker.vue';
+import PortfolioCreationChooseCategory from './portfolio-creation/PortfolioCreationChooseCategory.vue';
+import PortfolioCreationName from './portfolio-creation/PortfolioCreationName.vue';
 
 const { save, loading, portfolioForm } = useCreatePortfolioForm();
 

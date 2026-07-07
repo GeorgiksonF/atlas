@@ -2,9 +2,7 @@ import { ref } from 'vue';
 
 import type { BrokerResponse } from '@atlas/types';
 
-import { getErrorMessage } from '@/shared/api/errorMessage';
 import { ALL_PORTFOLIOS_CONTEXT, type PortfolioContext } from '@entities/portfolios';
-import { useAppToast } from '@utils';
 
 import { defineStore } from 'pinia';
 
@@ -12,11 +10,9 @@ import { portfoliosRepository } from '../api/portfoliosRepository';
 import { portfolioResponseToContext } from '../constants/adapters';
 
 export const usePortfoliosStore = defineStore('portfolios', () => {
-	const toast = useAppToast();
 	const portfolios = ref<PortfolioContext[]>([]);
 	const loading = ref(false);
 	const activePortfolio = ref<PortfolioContext>(ALL_PORTFOLIOS_CONTEXT);
-	const isPortfolioSidebarOpen = ref(false);
 
 	const fetchPortfolios = async () => {
 		loading.value = true;
@@ -44,14 +40,6 @@ export const usePortfoliosStore = defineStore('portfolios', () => {
 		activePortfolio.value = portfolios.value.find((p) => p.id === id) ?? ALL_PORTFOLIOS_CONTEXT;
 	};
 
-	const togglePortfolioSidebar = (): void => {
-		isPortfolioSidebarOpen.value = !isPortfolioSidebarOpen.value;
-	};
-
-	const setLoadError = (msg: string) => {
-		toast.error(msg);
-	};
-
 	const deletePortfolio = async (id: string) => {
 		await portfoliosRepository.delete(id);
 
@@ -70,8 +58,6 @@ export const usePortfoliosStore = defineStore('portfolios', () => {
 		isLoading.value = true;
 		try {
 			brokers.value = await portfoliosRepository.getBrokers();
-		} catch (err) {
-			toast.error(getErrorMessage(err, 'Не удалось загрузить список брокеров'));
 		} finally {
 			isLoading.value = false;
 		}
@@ -82,12 +68,9 @@ export const usePortfoliosStore = defineStore('portfolios', () => {
 		loading,
 		brokers,
 		activePortfolio,
-		isPortfolioSidebarOpen,
 		fetchPortfolios,
 		fetchBrokers,
 		deletePortfolio,
 		setActivePortfolio,
-		togglePortfolioSidebar,
-		setLoadError,
 	};
 });

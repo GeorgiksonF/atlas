@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router';
 import { portfoliosRepository } from '../api/portfoliosRepository';
 import { portfolioFormToCreate } from '../constants/adapters';
 import type { PortfolioForm } from '../schemas/portfolioFormSchemas';
-import { usePortfolioForm } from './usePortofolioForm';
+import { usePortfolioForm } from './usePortfolioForm';
 
 export function useCreatePortfolioForm() {
 	const router = useRouter();

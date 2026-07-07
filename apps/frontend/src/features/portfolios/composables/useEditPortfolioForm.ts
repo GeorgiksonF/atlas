@@ -8,7 +8,7 @@ import { useAppToast } from '@utils';
 import { portfoliosRepository } from '../api/portfoliosRepository';
 import { portfolioFormToUpdate, portfolioResponseToContext } from '../constants/adapters';
 import type { PortfolioForm } from '../schemas/portfolioFormSchemas';
-import { usePortfolioForm } from './usePortofolioForm';
+import { usePortfolioForm } from './usePortfolioForm';
 
 export function useEditPortfolioForm(portfolioId: MaybeRefOrGetter<string>) {
 	const router = useRouter();

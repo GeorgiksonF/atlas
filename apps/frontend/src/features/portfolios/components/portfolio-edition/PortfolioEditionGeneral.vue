@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { PORTFOLIO_CATEGORIES } from '@atlas/types';
 
-import { FormItem,OptionButton } from '@components';
+import { FormItem, OptionButton } from '@components';
 
 import { useField } from 'vee-validate';
 

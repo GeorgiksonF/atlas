@@ -7,7 +7,7 @@
 			actions-pinned
 			active
 			icon="pi pi-wallet"
-			@click="store.togglePortfolioSidebar()"
+			@click="portfolioUiStore.togglePortfolioSidebar()"
 		/>
 	</div>
 </template>
@@ -16,6 +16,8 @@
 import { PortfoliosListItem } from '@/entities/portfolios';
 
 import { usePortfoliosStore } from '../stores/portfoliosStore';
+import { usePortfolioUiStore } from '../stores/portfolioUiStore';
 
 const store = usePortfoliosStore();
+const portfolioUiStore = usePortfolioUiStore();
 </script>

@@ -117,7 +117,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
+import { useActivePortfolioId } from '@/features/portfolios';
 import AppDialog from '@/shared/components/AppDialog.vue';
 import FormItem from '@/shared/components/FormItem.vue';
 
@@ -171,13 +171,7 @@ const {
 	submitError,
 });
 
-const store = usePortfoliosStore();
-
-const currentPortfolioId = computed(() => {
-	const id = store.activePortfolio.id;
-	if (id && id !== 'all') return id;
-	return null;
-});
+const { currentPortfolioId } = useActivePortfolioId();
 
 const typeOptions = computed(() =>
 	TRANSACTION_TYPES.map((value) => ({

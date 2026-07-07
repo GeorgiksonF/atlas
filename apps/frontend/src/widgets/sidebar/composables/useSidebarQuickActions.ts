@@ -1,6 +1,6 @@
 import { useRouter } from 'vue-router';
 
-import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
+import { usePortfolioUiStore } from '@/features/portfolios/stores/portfolioUiStore';
 import { useAddTransactionModalStore } from '@/features/transactions/stores/addTransactionModalStore';
 import { useAppToast } from '@utils';
 
@@ -9,7 +9,7 @@ import type { MenuItem } from 'primevue/menuitem';
 export function useSidebarQuickActions(): { quickActions: MenuItem[] } {
 	const router = useRouter();
 	const addTransactionModalStore = useAddTransactionModalStore();
-	const store = usePortfoliosStore();
+	const portfolioUiStore = usePortfolioUiStore();
 	const toast = useAppToast();
 
 	const quickActions: MenuItem[] = [
@@ -20,8 +20,8 @@ export function useSidebarQuickActions(): { quickActions: MenuItem[] } {
 		{
 			label: 'Добавить портфель',
 			command: () => {
-				if (store.isPortfolioSidebarOpen) {
-					store.togglePortfolioSidebar();
+				if (portfolioUiStore.isPortfolioSidebarOpen) {
+					portfolioUiStore.closePortfolioSidebar();
 				}
 				void router.push({ name: 'createPortfolio' });
 			},

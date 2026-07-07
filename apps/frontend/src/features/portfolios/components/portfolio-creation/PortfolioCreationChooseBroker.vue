@@ -24,7 +24,6 @@ import { useField } from 'vee-validate';
 
 import { usePortfoliosStore } from '../../stores/portfoliosStore';
 
-
 const store = usePortfoliosStore();
 const { value: broker } = useField('broker');
 const { value: name } = useField<string>('name');
