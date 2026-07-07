@@ -14,9 +14,12 @@ import { TRANSACTION_ERROR_MESSAGES } from './constants/messages';
 import { transactionToResponse } from './utils/adapters';
 import { isTradeType } from './utils/transaction-type.utils';
 import {
+	assertNoNegativeAssetPositions,
 	assertValidCreatePayload,
 	assertValidUpdatePayload,
 	normalizeCreatePayload,
+	type NormalizedCreateTransactionData,
+	type NormalizedUpdateTransactionData,
 	normalizeUpdateData,
 } from './utils/transaction-validation.utils';
 
@@ -24,6 +27,15 @@ const CHRONOLOGICAL_ORDER = [
 	{ date: 'asc' as const },
 	{ createdAt: 'asc' as const },
 ];
+
+type PositionTransactionCandidate = {
+	assetId: string | null;
+	createdAt: Date;
+	date: Date;
+	id?: string;
+	quantity: number;
+	type: Transaction['type'];
+};
 
 @Injectable()
 export class TransactionsService {
@@ -48,6 +60,53 @@ export class TransactionsService {
 		}
 
 		return row;
+	}
+
+	private async assertPortfolioPositionsRemainValid(
+		portfolioId: string,
+		candidate: PositionTransactionCandidate,
+	): Promise<void> {
+		const rows = await this.prisma.transaction.findMany({
+			where: { portfolioId },
+			orderBy: CHRONOLOGICAL_ORDER,
+		});
+
+		const transactions = rows.map((row) =>
+			row.id === candidate.id ? candidate : row,
+		);
+
+		if (!candidate.id) {
+			transactions.push(candidate);
+		}
+
+		assertNoNegativeAssetPositions(transactions);
+	}
+
+	private buildCreatePositionCandidate(
+		data: NormalizedCreateTransactionData,
+	): PositionTransactionCandidate {
+		return {
+			assetId: data.assetId,
+			createdAt: new Date(),
+			date: data.date,
+			quantity: data.quantity,
+			type: data.type,
+		};
+	}
+
+	private buildUpdatePositionCandidate(
+		existing: Transaction,
+		data: NormalizedUpdateTransactionData,
+	): PositionTransactionCandidate {
+		return {
+			id: existing.id,
+			assetId:
+				data.assetId !== undefined ? data.assetId : existing.assetId,
+			createdAt: existing.createdAt,
+			date: data.date ?? existing.date,
+			quantity: data.quantity ?? existing.quantity,
+			type: data.type ?? existing.type,
+		};
 	}
 
 	async findAllByPortfolioId(
@@ -118,8 +177,14 @@ export class TransactionsService {
 			await this.assetsService.findById(dto.assetId);
 		}
 
+		const data = normalizeCreatePayload(dto, portfolioId);
+		await this.assertPortfolioPositionsRemainValid(
+			portfolioId,
+			this.buildCreatePositionCandidate(data),
+		);
+
 		const row = await this.prisma.transaction.create({
-			data: normalizeCreatePayload(dto, portfolioId),
+			data,
 		});
 		return transactionToResponse(row);
 	}
@@ -146,14 +211,20 @@ export class TransactionsService {
 			await this.assetsService.findById(effectiveAssetId);
 		}
 
+		const data = normalizeUpdateData(
+			dto,
+			existing,
+			effectiveType,
+			effectiveAssetId,
+		);
+		await this.assertPortfolioPositionsRemainValid(
+			portfolioId,
+			this.buildUpdatePositionCandidate(existing, data),
+		);
+
 		const row = await this.prisma.transaction.update({
 			where: { id: transactionId },
-			data: normalizeUpdateData(
-				dto,
-				existing,
-				effectiveType,
-				effectiveAssetId,
-			),
+			data,
 		});
 
 		return transactionToResponse(row);

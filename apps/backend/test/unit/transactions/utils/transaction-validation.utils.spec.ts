@@ -5,6 +5,7 @@ import type { CreateTransaction, UpdateTransaction } from '@atlas/types';
 
 import { TRANSACTION_ERROR_MESSAGES } from '@/transactions/constants/messages';
 import {
+	assertNoNegativeAssetPositions,
 	assertValidCreatePayload,
 	assertValidUpdatePayload,
 	normalizeCreatePayload,
@@ -25,6 +26,23 @@ const createDto = (
 	date: '2024-06-01',
 	currency: 'RUB',
 	assetId: ASSET_ID,
+	...overrides,
+});
+
+const positionTransaction = (
+	overrides: {
+		assetId?: string | null;
+		createdAt?: Date;
+		date?: Date;
+		quantity?: number;
+		type?: Transaction['type'];
+	} = {},
+) => ({
+	assetId: ASSET_ID,
+	createdAt: new Date('2024-06-01T10:00:00.000Z'),
+	date: new Date('2024-06-01'),
+	quantity: 10,
+	type: 'BUY' as Transaction['type'],
 	...overrides,
 });
 
@@ -95,6 +113,63 @@ describe('normalizeCreatePayload', () => {
 
 		expect(result.assetId).toBe(ASSET_ID);
 		expect(result.quantity).toBe(10);
+	});
+});
+
+describe('assertNoNegativeAssetPositions', () => {
+	it('пропускает продажу в пределах текущей позиции', () => {
+		expect(() =>
+			assertNoNegativeAssetPositions([
+				positionTransaction({ type: 'BUY', quantity: 10 }),
+				positionTransaction({
+					type: 'SELL',
+					quantity: 4,
+					date: new Date('2024-06-02'),
+					createdAt: new Date('2024-06-02T10:00:00.000Z'),
+				}),
+			]),
+		).not.toThrow();
+	});
+
+	it('бросает 400 при продаже больше текущей позиции', () => {
+		expect(() =>
+			assertNoNegativeAssetPositions([
+				positionTransaction({ type: 'BUY', quantity: 3 }),
+				positionTransaction({
+					type: 'SELL',
+					quantity: 4,
+					date: new Date('2024-06-02'),
+					createdAt: new Date('2024-06-02T10:00:00.000Z'),
+				}),
+			]),
+		).toThrow(
+			new BadRequestException(
+				TRANSACTION_ERROR_MESSAGES.INSUFFICIENT_ASSET_QUANTITY,
+			),
+		);
+	});
+
+	it('учитывает хронологию сделок при вставке продажи задним числом', () => {
+		expect(() =>
+			assertNoNegativeAssetPositions([
+				positionTransaction({
+					type: 'BUY',
+					quantity: 10,
+					date: new Date('2024-06-02'),
+					createdAt: new Date('2024-06-02T10:00:00.000Z'),
+				}),
+				positionTransaction({
+					type: 'SELL',
+					quantity: 1,
+					date: new Date('2024-06-01'),
+					createdAt: new Date('2024-06-03T10:00:00.000Z'),
+				}),
+			]),
+		).toThrow(
+			new BadRequestException(
+				TRANSACTION_ERROR_MESSAGES.INSUFFICIENT_ASSET_QUANTITY,
+			),
+		);
 	});
 });
 

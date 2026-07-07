@@ -50,6 +50,7 @@ import { PORTFOLIO_CATEGORIES } from '@atlas/types';
 
 import { FormItem, OptionButton } from '@components';
 
+import { storeToRefs } from 'pinia';
 import { useField } from 'vee-validate';
 
 import { usePortfoliosStore } from '../../stores/portfoliosStore';
@@ -65,5 +66,5 @@ const { value: category } = useField('category');
 const { value: broker } = useField('broker');
 
 const store = usePortfoliosStore();
-const { brokers } = store;
+const { brokers } = storeToRefs(store);
 </script>

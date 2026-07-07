@@ -10,6 +10,8 @@ import type {
 import { TRANSACTION_ERROR_MESSAGES } from '../constants/messages';
 import { isCashType, isTradeType } from './transaction-type.utils';
 
+const POSITION_EPSILON = 1e-9;
+
 export const assertValidCreatePayload = (dto: CreateTransaction): void => {
 	if (isTradeType(dto.type) && !dto.assetId) {
 		throw new BadRequestException(
@@ -46,6 +48,47 @@ export const normalizeCreatePayload = (
 	date: new Date(dto.date),
 	currency: dto.currency,
 });
+
+export type PositionValidationTransaction = {
+	assetId: string | null;
+	createdAt: Date;
+	date: Date;
+	quantity: number;
+	type: TransactionType;
+};
+
+export const assertNoNegativeAssetPositions = (
+	transactions: PositionValidationTransaction[],
+): void => {
+	const positions = new Map<string, number>();
+
+	const chronological = [...transactions].sort((a, b) => {
+		const dateDiff = a.date.getTime() - b.date.getTime();
+		if (dateDiff !== 0) return dateDiff;
+
+		return a.createdAt.getTime() - b.createdAt.getTime();
+	});
+
+	for (const tx of chronological) {
+		if (!isTradeType(tx.type) || !tx.assetId) {
+			continue;
+		}
+
+		const currentQuantity = positions.get(tx.assetId) ?? 0;
+		const nextQuantity =
+			tx.type === 'BUY'
+				? currentQuantity + tx.quantity
+				: currentQuantity - tx.quantity;
+
+		if (nextQuantity < -POSITION_EPSILON) {
+			throw new BadRequestException(
+				TRANSACTION_ERROR_MESSAGES.INSUFFICIENT_ASSET_QUANTITY,
+			);
+		}
+
+		positions.set(tx.assetId, nextQuantity);
+	}
+};
 
 export const resolveEffectiveType = (
 	dto: UpdateTransaction,
