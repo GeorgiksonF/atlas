@@ -52,18 +52,6 @@ export class AssetsService {
 		return response.map(assetWithQuotesToResponse);
 	}
 
-	async findAllWithQuotes(): Promise<AssetWithQuoteResponse[]> {
-		const response = await this.prisma.asset.findMany({
-			include: { quote: true },
-		});
-
-		if (!response.length) {
-			return [];
-		}
-
-		return response.map(assetWithQuotesToResponse);
-	}
-
 	async findByTicker(ticker: string): Promise<AssetResponse | null> {
 		return this.prisma.asset.findUnique({
 			where: { ticker: ticker.toUpperCase() },

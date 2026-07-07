@@ -4,11 +4,17 @@ import type {
 	TransactionType,
 } from '@atlas/types';
 
+import { createFxConversionContext } from '@/portfolios/utils/helper';
+
 let transactionIdCounter = 0;
+
+export const TEST_USD_TO_RUB = 90;
 
 export const resetFixtureCounters = (): void => {
 	transactionIdCounter = 0;
 };
+
+export const createTestFx = () => createFxConversionContext(TEST_USD_TO_RUB);
 
 export const d = (isoDate: string): Date => new Date(isoDate);
 

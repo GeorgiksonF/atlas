@@ -1,12 +1,17 @@
 import {
 	createAsset,
+	createTestFx,
 	createTransaction,
 	d,
 	resetFixtureCounters,
+	TEST_USD_TO_RUB,
 } from '@test/fixtures/portfolio-summary.fixtures';
 
 import {
+	computeAggregatedPortfolioSummary,
+	computeDayChange,
 	computePortfolioMetrics,
+	computePortfolioSummary,
 	computeReturnMetrics,
 } from '@/portfolios/utils/portfolio-summary.calculator';
 import type { Flow } from '@/portfolios/utils/xirr';
@@ -17,6 +22,7 @@ const oneYearLater = (start: Date): Date =>
 	new Date(start.getTime() + MS_PER_YEAR);
 
 const ASSET_ID = 'asset-aapl';
+const FX = createTestFx();
 
 describe('computeReturnMetrics', () => {
 	beforeEach(() => {
@@ -106,7 +112,7 @@ describe('computePortfolioMetrics', () => {
 	});
 
 	it('возвращает нулевые метрики для пустого списка транзакций', () => {
-		expect(computePortfolioMetrics([], assets)).toEqual({
+		expect(computePortfolioMetrics([], assets, FX)).toEqual({
 			totalValue: 0,
 			marketValue: 0,
 			cashBalance: 0,
@@ -127,6 +133,7 @@ describe('computePortfolioMetrics', () => {
 				}),
 			],
 			assets,
+			FX,
 		);
 
 		expect(metrics.cashBalance).toBe(100_000);
@@ -155,6 +162,7 @@ describe('computePortfolioMetrics', () => {
 				}),
 			],
 			assets,
+			FX,
 		);
 
 		expect(metrics.cashBalance).toBe(50_000);
@@ -187,6 +195,7 @@ describe('computePortfolioMetrics', () => {
 				}),
 			],
 			assets,
+			FX,
 		);
 
 		expect(metrics.cashBalance).toBe(110_000);
@@ -220,8 +229,13 @@ describe('computePortfolioMetrics', () => {
 		const chronological = computePortfolioMetrics(
 			[deposit, buy, sell],
 			assets,
+			FX,
 		);
-		const reversed = computePortfolioMetrics([sell, buy, deposit], assets);
+		const reversed = computePortfolioMetrics(
+			[sell, buy, deposit],
+			assets,
+			FX,
+		);
 
 		expect(chronological.cashBalance).toBe(110_000);
 		expect(chronological.totalValue).toBe(110_000);
@@ -247,6 +261,7 @@ describe('computePortfolioMetrics', () => {
 				}),
 			],
 			assets,
+			FX,
 		);
 
 		expect(metrics.cashBalance).toBe(80_000);
@@ -269,6 +284,7 @@ describe('computePortfolioMetrics', () => {
 				}),
 			],
 			assets,
+			FX,
 		);
 
 		expect(metrics.cashBalance).toBe(90_000);
@@ -291,9 +307,166 @@ describe('computePortfolioMetrics', () => {
 				}),
 			],
 			[createAsset({ id: 'asset-no-quote', ticker: 'NOQ' })],
+			FX,
 		);
 
 		expect(metrics.marketValue).toBe(10);
 		expect(metrics.profit).toBe(-990);
+	});
+});
+
+describe('computeAggregatedPortfolioSummary', () => {
+	const assets = [
+		createAsset({
+			id: ASSET_ID,
+			ticker: 'AAPL',
+			quote: { price: 6000, currency: 'RUB' },
+		}),
+	];
+
+	beforeEach(() => {
+		resetFixtureCounters();
+	});
+
+	it('возвращает empty summary для пустого списка портфелей', () => {
+		const summary = computeAggregatedPortfolioSummary([], assets, FX);
+		expect(summary.totalValue).toBe(0);
+		expect(summary.marketValue).toBe(0);
+	});
+
+	it('суммирует метрики двух портфелей как один виртуальный', () => {
+		const portfolioOne = [
+			createTransaction({
+				type: 'DEPOSIT',
+				price: 100_000,
+				quantity: 1,
+				portfolioId: 'p1',
+			}),
+		];
+		const portfolioTwo = [
+			createTransaction({
+				type: 'DEPOSIT',
+				price: 50_000,
+				quantity: 1,
+				portfolioId: 'p2',
+				date: d('2024-02-01'),
+			}),
+		];
+
+		const summary = computeAggregatedPortfolioSummary(
+			[portfolioOne, portfolioTwo],
+			assets,
+			FX,
+		);
+
+		expect(summary.totalValue).toBe(150_000);
+		expect(summary.cashBalance).toBe(150_000);
+		expect(summary.profit).toBe(0);
+	});
+
+	it('считает marketValue по объединённым позициям', () => {
+		const buyPortfolioOne = [
+			createTransaction({
+				type: 'DEPOSIT',
+				price: 100_000,
+				portfolioId: 'p1',
+			}),
+			createTransaction({
+				type: 'BUY',
+				assetId: ASSET_ID,
+				price: 5_000,
+				quantity: 10,
+				portfolioId: 'p1',
+				date: d('2024-02-01'),
+			}),
+		];
+		const buyPortfolioTwo = [
+			createTransaction({
+				type: 'DEPOSIT',
+				price: 60_000,
+				portfolioId: 'p2',
+				date: d('2024-01-15'),
+			}),
+			createTransaction({
+				type: 'BUY',
+				assetId: ASSET_ID,
+				price: 5_000,
+				quantity: 2,
+				portfolioId: 'p2',
+				date: d('2024-02-02'),
+			}),
+		];
+
+		const summary = computeAggregatedPortfolioSummary(
+			[buyPortfolioOne, buyPortfolioTwo],
+			assets,
+			FX,
+		);
+
+		expect(summary.marketValue).toBe(72_000);
+		expect(summary.totalValue).toBe(172_000);
+	});
+});
+
+describe('computeDayChange', () => {
+	it('возвращает null percent без данных за вчера', () => {
+		expect(computeDayChange(110_000, null)).toEqual({
+			dayChangeAmount: 0,
+			dayChangePercent: null,
+		});
+	});
+
+	it('считает изменение marketValue за день', () => {
+		expect(computeDayChange(110_000, 100_000)).toEqual({
+			dayChangeAmount: 10_000,
+			dayChangePercent: 10,
+		});
+	});
+});
+
+describe('computePortfolioSummary dayChange', () => {
+	const assets = [
+		createAsset({
+			id: ASSET_ID,
+			ticker: 'AAPL',
+			quote: { price: 110, currency: 'RUB' },
+		}),
+	];
+	const yesterdayAssets = [
+		createAsset({
+			id: ASSET_ID,
+			ticker: 'AAPL',
+			quote: { price: 100, currency: 'RUB' },
+		}),
+	];
+
+	beforeEach(() => {
+		resetFixtureCounters();
+	});
+
+	it('считает dayChange по snapshot-котировкам за вчера', () => {
+		const transactions = [
+			createTransaction({
+				type: 'DEPOSIT',
+				price: 100_000,
+			}),
+			createTransaction({
+				type: 'BUY',
+				assetId: ASSET_ID,
+				price: 100,
+				quantity: 100,
+				date: d('2024-01-01'),
+			}),
+		];
+
+		const summary = computePortfolioSummary(transactions, assets, FX, {
+			hasYesterdayQuoteData: true,
+			yesterdayAssets,
+			yesterdayCutoff: d('2024-01-01T23:59:59.999Z'),
+		});
+
+		expect(summary.marketValue).toBe(11_000);
+		expect(summary.dayChangeAmount).toBe(1_000);
+		expect(summary.dayChangePercent).toBeCloseTo(10, 6);
 	});
 });
