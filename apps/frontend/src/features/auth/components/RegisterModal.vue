@@ -109,22 +109,14 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
 
-import { getErrorMessage } from '@/shared/api/errorMessage';
 import AppDialog from '@/shared/components/AppDialog.vue';
-import { useAppToast } from '@utils';
 
 import { toTypedSchema } from '@vee-validate/zod';
 import { useField, useForm } from 'vee-validate';
 
-import { authRepository } from '../api/authRepository';
-import { register } from '../constants/messages';
+import { useAuth } from '../composables/useAuth';
 import { type RegisterFormValues, registerSchema } from '../schemas/registerSchema';
-import { useAuthStore } from '../stores/authStore';
-
-const router = useRouter();
-const toast = useAppToast();
 
 const props = defineProps<{
 	registerDialog: boolean;
@@ -182,9 +174,7 @@ const emailErrorText = computed(() => String(emailError.value ?? ''));
 const passwordErrorText = computed(() => String(passwordError.value ?? ''));
 const confirmPasswordErrorText = computed(() => String(confirmPasswordError.value ?? ''));
 
-const submitError = ref('');
-const loading = ref(false);
-const authStore = useAuthStore();
+const { loading, submitError, signUp } = useAuth();
 
 function resetForm(): void {
 	resetFormState();
@@ -197,27 +187,11 @@ function close(): void {
 
 const onSubmit = handleSubmit(onRegister);
 
-async function onRegister(values: {
-	name: string;
-	email: string;
-	password: string;
-	confirmPassword: string;
-}): Promise<void> {
-	submitError.value = '';
-	loading.value = true;
-	try {
-		const response = await authRepository.register(values);
-		authStore.setToken(response.accessToken);
-		authStore.setUser(response.user);
-		toast.success(register.toastSuccessSummary);
+async function onRegister(values: RegisterFormValues): Promise<void> {
+	const isRegistered = await signUp(values);
+
+	if (isRegistered) {
 		close();
-		await router.push({ name: 'portfolio' });
-	} catch (err: unknown) {
-		const errorText = getErrorMessage(err, register.errorFallback);
-		submitError.value = errorText;
-		toast.error(register.toastErrorSummary);
-	} finally {
-		loading.value = false;
 	}
 }
 </script>

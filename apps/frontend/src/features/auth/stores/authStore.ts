@@ -1,36 +1,38 @@
-import { computed,ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import type { User } from '@atlas/types';
+
+import { clearAuthToken, getAuthToken, setAuthToken } from '@/shared/api/authSession';
 
 import { defineStore } from 'pinia';
 
 export const useAuthStore = defineStore('auth', () => {
-    const token = ref<string | null>(localStorage.getItem('token'));
-    const user = ref<User | null>(null);
+	const token = ref<string | null>(getAuthToken());
+	const user = ref<User | null>(null);
 
-    const isAuthenticated = computed(() => !!token.value);
+	const isAuthenticated = computed(() => !!token.value);
 
-    const setToken = (newToken: string) => {
-        localStorage.setItem('token', newToken);
-        token.value = newToken;
-    }
+	const setToken = (newToken: string) => {
+		setAuthToken(newToken);
+		token.value = newToken;
+	};
 
-    const setUser = (newUser: User) => {
-        user.value = newUser;
-    }
+	const setUser = (newUser: User) => {
+		user.value = newUser;
+	};
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        user.value = null;
-        token.value = null;
-    }
+	const logout = () => {
+		clearAuthToken();
+		user.value = null;
+		token.value = null;
+	};
 
-    return {
-        token,
-        user,
-        isAuthenticated,
-        setToken,
-        setUser,
-        logout,
-    }
+	return {
+		token,
+		user,
+		isAuthenticated,
+		setToken,
+		setUser,
+		logout,
+	};
 });

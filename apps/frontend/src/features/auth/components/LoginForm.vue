@@ -59,23 +59,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
-
-import { getErrorMessage } from '@/shared/api/errorMessage';
-import { useAppToast } from '@utils';
+import { computed } from 'vue';
 
 import { toTypedSchema } from '@vee-validate/zod';
 import { useField, useForm } from 'vee-validate';
 
-import { authRepository } from '../api/authRepository';
-import { login } from '../constants/messages';
+import { useAuth } from '../composables/useAuth';
 import { type LoginFormValues, loginSchema } from '../schemas/loginSchema';
-import { useAuthStore } from '../stores/authStore';
 
-const router = useRouter();
 const emit = defineEmits<{ 'open-register': [] }>();
-const toast = useAppToast();
 
 const { handleSubmit } = useForm({
 	validationSchema: toTypedSchema(loginSchema),
@@ -96,28 +88,11 @@ const {
 const emailErrorText = computed(() => String(emailError.value ?? ''));
 const passwordErrorText = computed(() => String(passwordError.value ?? ''));
 
-const submitError = ref('');
-const loading = ref(false);
-const authStore = useAuthStore();
+const { loading, submitError, signIn } = useAuth();
 
 const onSubmit = handleSubmit(onLogin);
 
 async function onLogin(values: LoginFormValues): Promise<void> {
-	submitError.value = '';
-	loading.value = true;
-
-	try {
-		const response = await authRepository.login(values);
-		authStore.setToken(response.accessToken);
-		authStore.setUser(response.user);
-		toast.success(login.toastSuccessSummary);
-		await router.push({ name: 'portfolio' });
-	} catch (err: unknown) {
-		const errorText = getErrorMessage(err, login.errorFallback);
-		submitError.value = errorText;
-		toast.error(login.toastErrorSummary);
-	} finally {
-		loading.value = false;
-	}
+	await signIn(values);
 }
 </script>

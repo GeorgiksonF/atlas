@@ -30,7 +30,7 @@ export const usePortfolioForm = (props: Props) => {
 	const store = usePortfoliosStore();
 	const loading = ref(false);
 
-	const { handleSubmit, values, meta, resetForm, setFieldValue } = useForm({
+	const { handleSubmit, values, meta, resetForm } = useForm({
 		validationSchema: toTypedSchema(portfolioFormSchema),
 		initialValues: portfolioInitial(),
 	});

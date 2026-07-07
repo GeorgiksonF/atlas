@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
+import { useAuthStore } from '@/features/auth/stores/authStore';
 import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore.ts';
 
 import LandingView from '../views/LandingView.vue';
@@ -16,11 +17,13 @@ const router = createRouter({
 		{
 			path: '/login',
 			name: 'login',
+			meta: { requiresGuest: true },
 			component: LoginView,
 		},
 		{
 			path: '/app',
 			name: 'app',
+			meta: { requiresAuth: true },
 			async beforeEnter() {
 				const store = usePortfoliosStore();
 				try {
@@ -61,6 +64,18 @@ const router = createRouter({
 			],
 		},
 	],
+});
+
+router.beforeEach((to) => {
+	const authStore = useAuthStore();
+
+	if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+		return { name: 'login' };
+	}
+
+	if (to.meta.requiresGuest && authStore.isAuthenticated) {
+		return { name: 'portfolio' };
+	}
 });
 
 export default router;

@@ -1,6 +1,6 @@
-import { useAuthStore } from '@/features/auth/stores/authStore';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 
-import axios, { AxiosError,AxiosInstance } from 'axios';
+import { getAuthToken, handleUnauthorized } from './authSession';
 
 export const apiClient: AxiosInstance = axios.create({
 	baseURL: '/api',
@@ -10,8 +10,7 @@ export const apiClient: AxiosInstance = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-	const authStore = useAuthStore();
-	const token = authStore.token;
+	const token = getAuthToken();
 	if (token) {
 		config.headers.Authorization = `Bearer ${token}`;
 	}
@@ -27,9 +26,7 @@ apiClient.interceptors.response.use(
 				url.endsWith(path),
 			);
 			if (!isAuthRequest) {
-				const authStore = useAuthStore();
-				authStore.logout();
-				window.location.href = '/login';
+				handleUnauthorized();
 			}
 		}
 		return Promise.reject(error);
