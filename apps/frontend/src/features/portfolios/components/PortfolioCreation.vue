@@ -49,27 +49,13 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
-import { portfoliosRepository } from '../api/portfoliosRepository';
-import { usePortfolioForm } from '../composables/usePortofolioForm.ts';
-import { portfolioFormToCreate } from '../constants/adapters.ts';
-import { PortfolioForm } from '../schemas/portfolioFormSchemas.ts';
+import { useCreatePortfolioForm } from '../composables/useCreatePortfolioForm';
 import PortrfolioCreationChooseBroker from './portfolio-creation/PortrfolioCreationChooseBroker.vue';
 import PortrfolioCreationChooseCategory from './portfolio-creation/PortrfolioCreationChooseCategory.vue';
 import PortrfolioCreationName from './portfolio-creation/PortrfolioCreationName.vue';
 
-const router = useRouter();
-
-const submit = async (form: PortfolioForm) => {
-	return await portfoliosRepository.create(portfolioFormToCreate(form));
-};
-
-const { save, loading, portfolioForm } = usePortfolioForm({
-	submit,
-	onSuccess: () => router.push({ name: 'portfolio' }),
-	successMessage: 'Портфель создан',
-});
+const { save, loading, portfolioForm } = useCreatePortfolioForm();
 
 const STEPS = { TYPE: 1, BROKER: 2, NAME: 3 } as const;
 

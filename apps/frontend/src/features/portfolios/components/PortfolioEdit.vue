@@ -62,58 +62,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, toValue, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { getErrorMessage } from '@/shared/api/errorMessage.ts';
-import { useAppToast } from '@/shared/utils/toast.ts';
-import type { PortfolioContext } from '@entities/portfolios';
-
-import { portfoliosRepository } from '../api/portfoliosRepository';
-import { usePortfolioForm } from '../composables/usePortofolioForm.ts';
-import { portfolioFormToUpdate, portfolioResponseToContext } from '../constants/adapters.ts';
-import { PortfolioForm } from '../schemas/portfolioFormSchemas.ts';
+import { useEditPortfolioForm } from '../composables/useEditPortfolioForm';
 import PortfolioEdititonGeneral from './portfolio-edition/PortfolioEdititonGeneral.vue';
 
 const router = useRouter();
 const route = useRoute();
-const toast = useAppToast();
 
 const activeTab = ref('general');
-const portfolio = ref<PortfolioContext | null>(null);
-const isPortfolioFetching = ref(false);
 
 const portfolioId = computed(() => {
 	const id = route.params.id;
 	return Array.isArray(id) ? id[0] : id;
 });
 
-const submit = async (form: PortfolioForm) => {
-	return await portfoliosRepository.update(toValue(portfolioId), portfolioFormToUpdate(form));
-};
-
-const loadPortfolio = async () => {
-	isPortfolioFetching.value = true;
-	try {
-		const res = await portfoliosRepository.getById(portfolioId.value);
-		portfolio.value = portfolioResponseToContext(res);
-	} catch (err) {
-		toast.error(getErrorMessage(err, 'Не удалось найти портфель'));
-	} finally {
-		isPortfolioFetching.value = false;
-	}
-};
-
 const {
 	save,
 	loading: isSaving,
 	meta,
-} = usePortfolioForm({
-	portfolio,
-	submit,
-	onSuccess: () => router.push({ name: 'portfolioManagement' }),
-	successMessage: 'Портфель сохранён',
-});
-
-watch(portfolioId, loadPortfolio, { immediate: true });
+	isPortfolioFetching,
+} = useEditPortfolioForm(portfolioId);
 </script>

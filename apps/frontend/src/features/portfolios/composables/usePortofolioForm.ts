@@ -15,7 +15,7 @@ import { usePortfoliosStore } from '../stores/portfoliosStore';
 interface Props {
 	portfolio?: MaybeRefOrGetter<PortfolioContext | null>;
 	submit: (res: PortfolioForm) => Promise<PortfolioResponse>;
-	onSuccess?: () => void;
+	onSuccess?: () => void | Promise<void>;
 	successMessage: string;
 }
 
@@ -43,7 +43,7 @@ export const usePortfolioForm = (props: Props) => {
 		try {
 			await submit(form);
 			await store.fetchPortfolios();
-			onSuccess?.();
+			await onSuccess?.();
 			toast.success(successMessage);
 		} catch (err) {
 			toast.error(getErrorMessage(err, 'Не удалось изменить портфель'));
