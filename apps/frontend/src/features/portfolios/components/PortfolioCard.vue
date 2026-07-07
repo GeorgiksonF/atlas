@@ -30,12 +30,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+
+import type { PortfolioContext } from '@entities/portfolios';
 
 import { usePortfolioDeleteConfirm } from '../composables/usePortfolioDeleteConfirm.ts';
 import { usePortfolioMenuItems } from '../composables/usePortfoliosMenuItems.ts';
-import { type PortfolioContext } from '../stores/portfoliosStore.ts';
 import { getPortfolioCategoryLabel } from '../utils/helper.ts';
 
 const props = defineProps<{
@@ -49,7 +50,8 @@ const menuRef = ref();
 
 const openMenu = (e: Event) => menuRef.value?.toggle(e);
 
-const menuItems = usePortfolioMenuItems(props.portfolio, confirmDeletePortfolio);
+const { getPortfolioMenuItems } = usePortfolioMenuItems(confirmDeletePortfolio);
+const menuItems = computed(() => getPortfolioMenuItems(props.portfolio));
 
 const goToEdit = () => {
 	if (props.portfolio.isSystem) return;

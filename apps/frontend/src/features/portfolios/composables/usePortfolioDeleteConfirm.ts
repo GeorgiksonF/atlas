@@ -1,4 +1,5 @@
-import { PortfolioContext, usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
+import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
+import type { PortfolioContext } from '@entities/portfolios';
 import { useAppToast } from '@utils';
 
 import { useConfirm } from 'primevue/useconfirm';

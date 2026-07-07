@@ -14,7 +14,9 @@
 					{{ portfolio.category }}
 				</div>
 			</div>
-			<span class="shrink-0 text-xs text-slate-400"> 1000$ </span>
+			<span v-if="value" class="shrink-0 text-xs text-slate-400">
+				{{ value }}
+			</span>
 		</div>
 		<div
 			class="flex shrink-0 items-center overflow-hidden transition-[width] duration-200 ease-out"
@@ -33,7 +35,7 @@
 						rounded
 						size="small"
 						aria-label="Действия со счётом"
-						@click="menuRef?.toggle($event)"
+						@click.stop="menuRef?.toggle($event)"
 					/>
 				</div>
 			</div>
@@ -45,33 +47,27 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import {
-	PortfolioContext,
-	usePortfolioDeleteConfirm,
-	usePortfolioMenuItems,
-	usePortfoliosStore,
-} from '@features/portfolios';
+import type { MenuItem } from 'primevue/menuitem';
 
-const store = usePortfoliosStore();
-const { confirmDeletePortfolio } = usePortfolioDeleteConfirm({
-	afterSuccess: () => {
-		if (store.isPortfolioSidebarOpen) {
-			store.togglePortfolioSidebar();
-		}
-	},
-});
+import type { PortfolioContext } from '../model';
 
 const menuRef = ref<{ toggle: (e: Event) => void } | null>(null);
 
-const menuItems = usePortfolioMenuItems(store.activePortfolio, confirmDeletePortfolio);
-
-defineProps<{
-	icon: string;
-	value?: string;
-	portfolio: PortfolioContext;
-	active: boolean;
-	actionsPinned?: boolean;
-}>();
+withDefaults(
+	defineProps<{
+		icon: string;
+		value?: string;
+		portfolio: PortfolioContext;
+		active: boolean;
+		actionsPinned?: boolean;
+		menuItems?: MenuItem[];
+	}>(),
+	{
+		value: undefined,
+		actionsPinned: false,
+		menuItems: () => [],
+	},
+);
 
 defineEmits<{
 	click: [];

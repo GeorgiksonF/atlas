@@ -50,8 +50,9 @@
 </template>
 
 <script setup lang="ts">
+import { ALL_PORTFOLIOS_CONTEXT } from '@entities/portfolios';
+
 import { usePortfolioGrouped } from '../composables/usePortfolioGrouped.ts';
-import { ALL_PORTFOLIOS_CONTEXT } from '../stores/portfoliosStore';
 import ManagementCategorySection from './ManagementCategorySection.vue';
 import PortfolioCard from './PortfolioCard.vue';
 

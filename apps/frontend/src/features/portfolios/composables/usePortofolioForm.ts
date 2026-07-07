@@ -3,13 +3,14 @@ import { MaybeRefOrGetter, ref, toValue, watch } from 'vue';
 import { PortfolioResponse } from '@atlas/types';
 
 import { getErrorMessage } from '@/shared/api/errorMessage';
+import type { PortfolioContext } from '@entities/portfolios';
 import { useAppToast } from '@utils';
 
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 
 import { PortfolioForm, portfolioFormSchema } from '../schemas/portfolioFormSchemas';
-import { PortfolioContext, usePortfoliosStore } from '../stores/portfoliosStore';
+import { usePortfoliosStore } from '../stores/portfoliosStore';
 
 interface Props {
 	portfolio?: MaybeRefOrGetter<PortfolioContext | null>;

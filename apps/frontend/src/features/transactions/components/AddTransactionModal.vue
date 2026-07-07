@@ -115,24 +115,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
 import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
-import { getErrorMessage } from '@/shared/api/errorMessage';
 import AppDialog from '@/shared/components/AppDialog.vue';
 import FormItem from '@/shared/components/FormItem.vue';
-import { useAppToast } from '@utils';
 
-import { transactionsRepository } from '../api/transactionsRepository';
 import { useAddTransactionAssetField } from '../composables/useAddTransactionAssetField';
 import { useAddTransactionForm } from '../composables/useAddTransactionForm';
+import { useCreateTransaction } from '../composables/useCreateTransaction';
 import { CURRENCY_LABELS, CURRENCY_TYPES } from '../constants/currency';
 import {
 	isTradeTransactionType,
 	TRANSACTION_TYPE_LABELS,
 	TRANSACTION_TYPES,
 } from '../constants/transactionTypes';
-import { createTransactionPayload } from '../utils/createTransactionPayload';
 
 const visible = defineModel<boolean>('visible', { required: true });
 
@@ -155,8 +152,7 @@ const {
 	dateError,
 } = useAddTransactionForm();
 
-const submitError = ref('');
-const loading = ref(false);
+const { loading, submitError, createTransaction } = useCreateTransaction();
 
 const {
 	assetSearchValue,
@@ -175,13 +171,12 @@ const {
 	submitError,
 });
 
-const toast = useAppToast();
 const store = usePortfoliosStore();
 
 const currentPortfolioId = computed(() => {
 	const id = store.activePortfolio.id;
 	if (id && id !== 'all') return id;
-	return store.portfolios[0].id ?? null;
+	return null;
 });
 
 const typeOptions = computed(() =>
@@ -210,19 +205,11 @@ function resetForm() {
 
 const onSubmit = handleSubmit(async (formValues) => {
 	if (!currentPortfolioId.value) return;
-	submitError.value = '';
-	loading.value = true;
-	try {
-		await transactionsRepository.create(
-			currentPortfolioId.value,
-			createTransactionPayload(formValues),
-		);
-		toast.success('Сделка добавлена');
+
+	const isCreated = await createTransaction(currentPortfolioId.value, formValues);
+
+	if (isCreated) {
 		visible.value = false;
-	} catch (err: unknown) {
-		submitError.value = getErrorMessage(err, 'Не удалось добавить сделку');
-	} finally {
-		loading.value = false;
 	}
 });
 </script>

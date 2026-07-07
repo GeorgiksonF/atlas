@@ -1,34 +1,15 @@
 import { ref } from 'vue';
 
-import type { BrokerResponse, PortfolioBroker, PortfolioCategory } from '@atlas/types';
+import type { BrokerResponse } from '@atlas/types';
 
 import { getErrorMessage } from '@/shared/api/errorMessage';
+import { ALL_PORTFOLIOS_CONTEXT, type PortfolioContext } from '@entities/portfolios';
 import { useAppToast } from '@utils';
 
 import { defineStore } from 'pinia';
 
 import { portfoliosRepository } from '../api/portfoliosRepository';
 import { portfolioResponseToContext } from '../constants/adapters';
-
-export type PortfolioContext = {
-	id: string | 'all';
-	name: string;
-	category: PortfolioCategory;
-	broker: PortfolioBroker | null;
-	description?: string;
-	isSystem: boolean;
-	isComposite: boolean;
-};
-
-export const ALL_PORTFOLIOS_CONTEXT: PortfolioContext = {
-	id: 'all',
-	name: 'Все активы',
-	category: 'составной' as PortfolioCategory,
-	broker: null,
-	isComposite: true,
-	isSystem: true,
-	description: 'Общий портфель содержащий в себе все остальные счета',
-};
 
 export const usePortfoliosStore = defineStore('portfolios', () => {
 	const toast = useAppToast();
@@ -43,6 +24,8 @@ export const usePortfoliosStore = defineStore('portfolios', () => {
 			const response = await portfoliosRepository.getList();
 
 			if (!response.length) {
+				portfolios.value = [];
+				activePortfolio.value = ALL_PORTFOLIOS_CONTEXT;
 				return;
 			}
 

@@ -24,6 +24,7 @@
 						:key="p.id"
 						class="relative rounded-lg"
 						icon="pi pi-wallet"
+						:menu-items="getPortfolioMenuItems(p)"
 						:portfolio="p"
 						:active="store.activePortfolio.id === p.id"
 						@click="selectPortfolio(p.id)"
@@ -40,8 +41,12 @@
 import { ref } from 'vue';
 
 import { CollapsibleSection } from '@components';
-import { PortfoliosListItem } from '@entities/portfolios';
-import { ALL_PORTFOLIOS_CONTEXT,usePortfoliosStore } from '@features/portfolios';
+import { ALL_PORTFOLIOS_CONTEXT, PortfoliosListItem } from '@entities/portfolios';
+import {
+	usePortfolioDeleteConfirm,
+	usePortfolioMenuItems,
+	usePortfoliosStore,
+} from '@features/portfolios';
 
 import { onClickOutside } from '@vueuse/core';
 
@@ -51,6 +56,14 @@ import PortfolioAddButton from './PortfolioAddButton.vue';
 
 
 const store = usePortfoliosStore();
+const { confirmDeletePortfolio } = usePortfolioDeleteConfirm({
+	afterSuccess: () => {
+		if (store.isPortfolioSidebarOpen) {
+			store.togglePortfolioSidebar();
+		}
+	},
+});
+const { getPortfolioMenuItems } = usePortfolioMenuItems(confirmDeletePortfolio);
 
 const isInvestmentsExpanded = ref(true);
 const asideRoot = ref<HTMLElement | null>(null);

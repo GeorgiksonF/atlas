@@ -1,7 +1,8 @@
 import { CreatePortfolio, PortfolioResponse, UpdatePortfolio } from '@atlas/types';
 
+import type { PortfolioContext } from '@entities/portfolios';
+
 import { PortfolioForm } from '../schemas/portfolioFormSchemas';
-import { PortfolioContext } from '../stores/portfoliosStore';
 
 export const portoflioFormToCreate = (form: PortfolioForm): CreatePortfolio => ({
 	name: form.name,
