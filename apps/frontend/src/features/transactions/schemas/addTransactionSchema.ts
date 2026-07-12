@@ -1,5 +1,7 @@
-import { z } from 'zod';
 import type { CurrencyType, TransactionType } from '@atlas/types';
+
+import { z } from 'zod';
+
 import { CURRENCY_TYPES } from '../constants/currency';
 import {
 	isTradeTransactionType,

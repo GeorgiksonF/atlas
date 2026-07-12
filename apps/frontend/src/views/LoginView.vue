@@ -21,6 +21,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+
 import LoginForm from '@/features/auth/components/LoginForm.vue';
 import RegisterModal from '@/features/auth/components/RegisterModal.vue';
 

@@ -1,10 +1,11 @@
 import type { RegisterRequest } from '@atlas/types';
+
 import {
 	IsEmail,
 	IsNotEmpty,
 	IsString,
-	MinLength,
 	MaxLength,
+	MinLength,
 } from 'class-validator';
 
 export class RegisterDto implements RegisterRequest {

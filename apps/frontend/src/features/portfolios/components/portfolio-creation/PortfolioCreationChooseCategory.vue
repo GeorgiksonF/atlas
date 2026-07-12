@@ -1,0 +1,38 @@
+<template>
+	<section
+		class="flex flex-col gap-6 bg-slate-800 p-4"
+		role="group"
+		aria-label="Шаг 1: тип портфеля"
+	>
+		<div class="flex flex-col gap-2">
+			<h2 class="text-xl font-bold">Выберите тип портфеля</h2>
+			<p class="text-m text-slate-400">Выберите тип портфеля, который вы хотите создать</p>
+		</div>
+		<div class="flex gap-3">
+			<OptionButton
+				v-for="cat in categories"
+				:key="cat.value"
+				v-model="category"
+				:option="cat"
+				button-class="w-60"
+			/>
+		</div>
+	</section>
+</template>
+
+<script setup lang="ts">
+import { PORTFOLIO_CATEGORIES } from '@atlas/types';
+
+import { OptionButton } from '@components';
+
+import { useField } from 'vee-validate';
+
+import { getPortfolioCategoryLabel } from '../../utils/helper';
+
+const categories = PORTFOLIO_CATEGORIES.map((key) => ({
+	value: key,
+	label: getPortfolioCategoryLabel(key),
+}));
+
+const { value: category } = useField('category');
+</script>

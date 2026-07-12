@@ -1,11 +1,11 @@
-import { Prisma, Portfolio } from '@atlas/database';
-
+import { Portfolio, Prisma } from '@atlas/database';
 import type {
-	PortfolioWithTransactionsResponse,
-	TransactionResponse,
 	PortfolioBroker,
 	PortfolioResponse,
+	PortfolioWithTransactionsResponse,
 } from '@atlas/types';
+
+import { transactionToResponse } from '../../transactions/utils/adapters';
 
 type PortfolioWithTransactionsRow = Prisma.PortfolioGetPayload<{
 	include: {
@@ -24,19 +24,7 @@ export const portfolioWithTransactionToResponse = (
 	updatedAt: row.updatedAt,
 	description: row.description,
 	userId: row.userId,
-	transactions: row.transactions.map(
-		(tx): TransactionResponse => ({
-			id: tx.id,
-			quantity: tx.quantity,
-			price: Number(tx.price),
-			type: tx.type,
-			date: tx.date,
-			currency: tx.currency,
-			createdAt: tx.createdAt,
-			portfolioId: tx.portfolioId,
-			assetId: tx.assetId,
-		}),
-	),
+	transactions: row.transactions.map(transactionToResponse),
 });
 
 export const portfolioToResponse = (row: Portfolio): PortfolioResponse => ({

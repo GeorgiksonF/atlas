@@ -1,16 +1,38 @@
 import type { CurrencyType } from '@atlas/types';
 
-const USD_TO_RUB = 90; // Нужно заменить на реальный курс.
+import { toMoscowCalendarDate } from './moscow-date.utils';
 
-export function amountToRub(amount: number, currency: CurrencyType): number {
+export type FxConversionContext = {
+	currentUsdToRub: number;
+	usdToRubAt: (date: Date) => number;
+};
+
+export const createFxConversionContext = (
+	currentUsdToRub: number,
+	historicalRatesByDate: ReadonlyMap<string, number> = new Map(),
+): FxConversionContext => ({
+	currentUsdToRub,
+	usdToRubAt: (date: Date) => {
+		const calendarDate = toMoscowCalendarDate(date);
+		return historicalRatesByDate.get(calendarDate) ?? currentUsdToRub;
+	},
+});
+
+export function amountToRub(
+	amount: number,
+	currency: CurrencyType,
+	fx: FxConversionContext,
+	at?: Date,
+): number {
 	if (currency === 'USD') {
-		return amount * USD_TO_RUB;
+		const rate = at ? fx.usdToRubAt(at) : fx.currentUsdToRub;
+		return amount * rate;
 	}
 	return amount;
 }
 
-export function rubToUsd(rub: number): number {
-	return rub / USD_TO_RUB;
+export function rubToUsd(rub: number, fx: FxConversionContext): number {
+	return rub / fx.currentUsdToRub;
 }
 
 export function roundMoney(n: number): number {

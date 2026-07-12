@@ -1,30 +1,33 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+
+import type { PortfolioContext } from '@entities/portfolios';
+
 import { MenuItem } from 'primevue/menuitem';
-import { PortfolioContext } from '../stores/portfoliosStore';
 
-const router = useRouter();
+export const usePortfolioMenuItems = (onDelete: (portfolio: PortfolioContext) => void) => {
+	const router = useRouter();
 
-export const usePortfolioMenuItems = (
-	portfoio: PortfolioContext,
-	onDelete: (portfoio: PortfolioContext) => void,
-) => {
-	const items = ref<MenuItem[]>([
-		{
-			label: 'Редактировать',
-			icon: 'pi pi-pencil',
-			disabled: portfoio.isSystem,
-			command: () => {
-				router.push({ name: 'editPortfolio', params: { id: portfoio.id } });
+	const getPortfolioMenuItems = (portfolio: PortfolioContext): MenuItem[] => {
+		const items = ref<MenuItem[]>([
+			{
+				label: 'Редактировать',
+				icon: 'pi pi-pencil',
+				disabled: portfolio.isSystem,
+				command: () => {
+					router.push({ name: 'editPortfolio', params: { id: portfolio.id } });
+				},
 			},
-		},
-		{
-			label: 'Удалить',
-			icon: 'pi pi-trash',
-			disabled: portfoio.isSystem,
-			command: () => onDelete(portfoio),
-		},
-	]);
+			{
+				label: 'Удалить',
+				icon: 'pi pi-trash',
+				disabled: portfolio.isSystem,
+				command: () => onDelete(portfolio),
+			},
+		]);
 
-	return items.value.filter((item) => !item.isSystem);
+		return items.value.filter((item) => !item.isSystem && !item.disabled);
+	};
+
+	return { getPortfolioMenuItems };
 };

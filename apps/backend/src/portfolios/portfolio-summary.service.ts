@@ -1,121 +1,129 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@atlas/database';
-import type { PortfolioSummaryResponse } from '@atlas/types';
-import { TransactionsService } from '../transactions/transactions.service';
+
+import type {
+	AssetWithQuoteResponse,
+	PortfolioSummaryResponse,
+} from '@atlas/types';
+
 import { AssetsService } from '../assets/assets.service';
+import { FxRateService } from '../fx/fx-rate.service';
 import {
+	applySnapshotQuotesToAssets,
+	QuoteSnapshotRepository,
+} from '../quotes/persistence/quote-snapshot.repository';
+import { TransactionsService } from '../transactions/transactions.service';
+import {
+	endOfMoscowCalendarDateUtc,
+	yesterdayMoscowCalendarDate,
+} from './utils/moscow-date.utils';
+import {
+	computeAggregatedPortfolioSummary,
 	computePortfolioSummary,
-	computeXirr,
 	emptyPortfolioSummary,
-	sumPortfoliosSummaries,
-	type Flow,
 } from './utils/portfolio-summary.calculator';
-import { amountToRub, rubToUsd, roundMoney } from './utils/helper';
-import { portfolioWithTransactionToResponse } from './utils/adapters';
+import { collectAssetIds } from './utils/summary-data.utils';
 
 @Injectable()
 export class PortfolioSummaryService {
 	constructor(
-		private readonly prisma: PrismaClient,
 		private readonly transactionService: TransactionsService,
 		private readonly assetsService: AssetsService,
+		private readonly fxRateService: FxRateService,
+		private readonly quoteSnapshotRepository: QuoteSnapshotRepository,
 	) {}
 
 	async getSummaryForPortfolio(
 		portfolioId: string,
 		userId: string,
 	): Promise<PortfolioSummaryResponse> {
-		const transactions = await this.transactionService.findAllByPortfolioId(
-			portfolioId,
-			userId,
-		);
+		const transactions =
+			await this.transactionService.findAllByPortfolioIdChronological(
+				portfolioId,
+				userId,
+			);
 
-		const assetsIds = [
-			...new Set(
-				transactions
-					.map((tx) => tx.assetId)
-					.filter((txId) => txId !== null),
-			),
-		];
-
-		const assets = await this.assetsService.findByIdsWithQuotes(assetsIds);
-
-		return computePortfolioSummary(transactions, assets);
+		return this.buildSummary(transactions);
 	}
 
 	async getSummaryForAllUserPortfolios(
 		userId: string,
 	): Promise<PortfolioSummaryResponse> {
-		const response = await this.prisma.portfolio.findMany({
-			where: { userId },
-			include: {
-				transactions: {
-					orderBy: { date: 'asc' },
-				},
-			},
-		});
+		const transactionsByPortfolio =
+			await this.transactionService.findAllChronologicalGroupedByUserPortfolios(
+				userId,
+			);
 
-		if (response.length === 0) {
-			return emptyPortfolioSummary();
+		if (transactionsByPortfolio.length === 0) {
+			const fx = await this.fxRateService.buildConversionContext();
+			return emptyPortfolioSummary(fx);
 		}
 
-		const portfolios = response.map(portfolioWithTransactionToResponse);
-
-		const assets = await this.assetsService.findAllWithQuotes();
-
-		const summaries = portfolios.map((p) =>
-			computePortfolioSummary(p.transactions, assets),
+		const allTransactions = transactionsByPortfolio.flat();
+		const assetIds = collectAssetIds(allTransactions);
+		const assets = await this.assetsService.findByIdsWithQuotes(assetIds);
+		const fx =
+			await this.fxRateService.buildConversionContext(allTransactions);
+		const dayChangeContext = await this.buildDayChangeContext(
+			assetIds,
+			assets,
 		);
 
-		const sums = sumPortfoliosSummaries(summaries);
+		return computeAggregatedPortfolioSummary(
+			transactionsByPortfolio,
+			assets,
+			fx,
+			dayChangeContext,
+		);
+	}
 
-		const investorFlows: Flow[] = [];
-		let netDepositsRub = 0;
+	private async buildSummary(
+		transactions: Awaited<
+			ReturnType<TransactionsService['findAllByPortfolioIdChronological']>
+		>,
+	): Promise<PortfolioSummaryResponse> {
+		const assetIds = collectAssetIds(transactions);
+		const assets = await this.assetsService.findByIdsWithQuotes(assetIds);
+		const fx =
+			await this.fxRateService.buildConversionContext(transactions);
+		const dayChangeContext = await this.buildDayChangeContext(
+			assetIds,
+			assets,
+		);
 
-		for (const p of portfolios) {
-			for (const tx of p.transactions) {
-				if (tx.type === 'DEPOSIT') {
-					const cashFlow = amountToRub(tx.price, tx.currency);
-					netDepositsRub += cashFlow;
-					investorFlows.push({
-						date: tx.date,
-						cashFlow: -cashFlow,
-					});
-				} else if (tx.type === 'WITHDRAWAL') {
-					const cashFlow = amountToRub(tx.price, tx.currency);
-					netDepositsRub -= cashFlow;
-					investorFlows.push({
-						date: tx.date,
-						cashFlow: cashFlow,
-					});
-				}
-			}
+		return computePortfolioSummary(
+			transactions,
+			assets,
+			fx,
+			dayChangeContext,
+		);
+	}
+
+	private async buildDayChangeContext(
+		assetIds: string[],
+		assets: AssetWithQuoteResponse[],
+	) {
+		const yesterdayDate = yesterdayMoscowCalendarDate();
+		const hasYesterdayQuoteData =
+			assetIds.length > 0 &&
+			(await this.quoteSnapshotRepository.hasSnapshotsForAssetIds(
+				assetIds,
+				yesterdayDate,
+			));
+
+		if (!hasYesterdayQuoteData) {
+			return { hasYesterdayQuoteData: false };
 		}
 
-		investorFlows.push({ date: new Date(), cashFlow: sums.totalValue });
-		const xirr = computeXirr(investorFlows);
-		const annualizedReturnPercent =
-			xirr !== null && Number.isFinite(xirr)
-				? Math.round(xirr * 1e6) / 1e4
-				: null;
-
-		const profitPercentOfNetInvested =
-			netDepositsRub > 1e-6
-				? Math.round((sums.profit / netDepositsRub) * 1e6) / 1e4
-				: null;
+		const snapshots =
+			await this.quoteSnapshotRepository.findByAssetIdsAndCalendarDate(
+				assetIds,
+				yesterdayDate,
+			);
 
 		return {
-			totalValue: roundMoney(sums.totalValue),
-			marketValue: roundMoney(sums.marketValue),
-			cashBalance: roundMoney(sums.cashBalance),
-			profit: roundMoney(sums.profit),
-			profitPercentOfNetInvested,
-			annualizedReturnPercent,
-			dayChangeAmount: 0,
-			dayChangePercent: null,
-			primaryCurrency: 'RUB',
-			alternativeCurrency: 'USD',
-			alternativeTotalValue: roundMoney(rubToUsd(sums.totalValue)),
+			hasYesterdayQuoteData: true,
+			yesterdayAssets: applySnapshotQuotesToAssets(assets, snapshots),
+			yesterdayCutoff: endOfMoscowCalendarDateUtc(yesterdayDate),
 		};
 	}
 }

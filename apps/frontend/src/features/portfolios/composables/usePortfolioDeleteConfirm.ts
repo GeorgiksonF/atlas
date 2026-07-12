@@ -1,6 +1,8 @@
-import { PortfolioContext, usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
-import { useConfirm } from 'primevue/useconfirm';
+import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore';
+import type { PortfolioContext } from '@entities/portfolios';
 import { useAppToast } from '@utils';
+
+import { useConfirm } from 'primevue/useconfirm';
 
 export type UsePortfolioDeleteConfirmOptions = {
 	afterSuccess?: () => void;

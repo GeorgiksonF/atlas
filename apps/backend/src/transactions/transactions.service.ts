@@ -1,8 +1,5 @@
-import {
-	BadRequestException,
-	Injectable,
-	NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+
 import { PrismaClient, Transaction } from '@atlas/database';
 import type {
 	CreateTransaction,
@@ -10,57 +7,48 @@ import type {
 	TransactionsResponse,
 	UpdateTransaction,
 } from '@atlas/types';
-import { TRANSACTION_ERROR_MESSAGES } from './constants/messages';
-import { PortfoliosService } from '../portfolios/portfolios.service';
-import { AssetsService } from '../assets/assets.service';
 
-export const transctionToResponse = (
-	row: Transaction,
-): TransactionResponse => ({
-	...row,
-	price: Number(row.price),
-});
+import { AssetsService } from '../assets/assets.service';
+import { PortfolioAccessService } from '../portfolios/access/portfolio-access.service';
+import { TRANSACTION_ERROR_MESSAGES } from './constants/messages';
+import { transactionToResponse } from './utils/adapters';
+import { isTradeType } from './utils/transaction-type.utils';
+import {
+	assertNoNegativeAssetPositions,
+	assertValidCreatePayload,
+	assertValidUpdatePayload,
+	normalizeCreatePayload,
+	type NormalizedCreateTransactionData,
+	type NormalizedUpdateTransactionData,
+	normalizeUpdateData,
+} from './utils/transaction-validation.utils';
+
+const CHRONOLOGICAL_ORDER = [
+	{ date: 'asc' as const },
+	{ createdAt: 'asc' as const },
+];
+
+type PositionTransactionCandidate = {
+	assetId: string | null;
+	createdAt: Date;
+	date: Date;
+	id?: string;
+	quantity: number;
+	type: Transaction['type'];
+};
+
 @Injectable()
 export class TransactionsService {
 	constructor(
 		private readonly prisma: PrismaClient,
-		private readonly portfoliosService: PortfoliosService,
+		private readonly portfolioAccessService: PortfolioAccessService,
 		private readonly assetsService: AssetsService,
 	) {}
 
-	private async ensurePortfolioAccess(
-		portfolioId: string,
-		userId: string,
-	): Promise<void> {
-		if (!userId) {
-			throw new BadRequestException(
-				TRANSACTION_ERROR_MESSAGES.USER_ID_REQUIRED,
-			);
-		}
-
-		await this.portfoliosService.findById(portfolioId, userId);
-	}
-
-	async findAllByPortfolioId(
-		portfolioId: string,
-		userId: string,
-	): Promise<TransactionsResponse> {
-		await this.ensurePortfolioAccess(portfolioId, userId);
-
-		const rows = await this.prisma.transaction.findMany({
-			where: { portfolioId },
-			orderBy: { date: 'desc' },
-		});
-		return rows.map(transctionToResponse);
-	}
-
-	async findById(
+	private async findOwnedTransaction(
 		portfolioId: string,
 		transactionId: string,
-		userId: string,
-	): Promise<TransactionResponse> {
-		await this.ensurePortfolioAccess(portfolioId, userId);
-
+	): Promise<Transaction> {
 		const row = await this.prisma.transaction.findFirst({
 			where: { id: transactionId, portfolioId },
 		});
@@ -70,7 +58,110 @@ export class TransactionsService {
 				TRANSACTION_ERROR_MESSAGES.TRANSACTION_NOT_FOUND,
 			);
 		}
-		return transctionToResponse(row);
+
+		return row;
+	}
+
+	private async assertPortfolioPositionsRemainValid(
+		portfolioId: string,
+		candidate: PositionTransactionCandidate,
+	): Promise<void> {
+		const rows = await this.prisma.transaction.findMany({
+			where: { portfolioId },
+			orderBy: CHRONOLOGICAL_ORDER,
+		});
+
+		const transactions = rows.map((row) =>
+			row.id === candidate.id ? candidate : row,
+		);
+
+		if (!candidate.id) {
+			transactions.push(candidate);
+		}
+
+		assertNoNegativeAssetPositions(transactions);
+	}
+
+	private buildCreatePositionCandidate(
+		data: NormalizedCreateTransactionData,
+	): PositionTransactionCandidate {
+		return {
+			assetId: data.assetId,
+			createdAt: new Date(),
+			date: data.date,
+			quantity: data.quantity,
+			type: data.type,
+		};
+	}
+
+	private buildUpdatePositionCandidate(
+		existing: Transaction,
+		data: NormalizedUpdateTransactionData,
+	): PositionTransactionCandidate {
+		return {
+			id: existing.id,
+			assetId:
+				data.assetId !== undefined ? data.assetId : existing.assetId,
+			createdAt: existing.createdAt,
+			date: data.date ?? existing.date,
+			quantity: data.quantity ?? existing.quantity,
+			type: data.type ?? existing.type,
+		};
+	}
+
+	async findAllByPortfolioId(
+		portfolioId: string,
+		userId: string,
+	): Promise<TransactionsResponse> {
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
+
+		const rows = await this.prisma.transaction.findMany({
+			where: { portfolioId },
+			orderBy: { date: 'desc' },
+		});
+		return rows.map(transactionToResponse);
+	}
+
+	async findAllByPortfolioIdChronological(
+		portfolioId: string,
+		userId: string,
+	): Promise<TransactionsResponse> {
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
+
+		const rows = await this.prisma.transaction.findMany({
+			where: { portfolioId },
+			orderBy: CHRONOLOGICAL_ORDER,
+		});
+		return rows.map(transactionToResponse);
+	}
+
+	async findAllChronologicalGroupedByUserPortfolios(
+		userId: string,
+	): Promise<TransactionResponse[][]> {
+		const portfolios = await this.prisma.portfolio.findMany({
+			where: { userId },
+			orderBy: { createdAt: 'asc' },
+			include: {
+				transactions: {
+					orderBy: CHRONOLOGICAL_ORDER,
+				},
+			},
+		});
+
+		return portfolios.map((portfolio) =>
+			portfolio.transactions.map(transactionToResponse),
+		);
+	}
+
+	async findById(
+		portfolioId: string,
+		transactionId: string,
+		userId: string,
+	): Promise<TransactionResponse> {
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
+
+		const row = await this.findOwnedTransaction(portfolioId, transactionId);
+		return transactionToResponse(row);
 	}
 
 	async create(
@@ -78,43 +169,24 @@ export class TransactionsService {
 		userId: string,
 		dto: CreateTransaction,
 	): Promise<TransactionResponse> {
-		await this.ensurePortfolioAccess(portfolioId, userId);
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
 
-		const isTrade = dto.type === 'BUY' || dto.type === 'SELL';
-		const isCash = dto.type === 'DEPOSIT' || dto.type === 'WITHDRAWAL';
+		assertValidCreatePayload(dto);
 
-		if (isTrade) {
-			if (!dto.assetId) {
-				throw new BadRequestException(
-					TRANSACTION_ERROR_MESSAGES.ASSET_REQUIRED_FOR_TRADE,
-				);
-			}
-
+		if (isTradeType(dto.type) && dto.assetId) {
 			await this.assetsService.findById(dto.assetId);
 		}
 
-		if (isCash) {
-			if (dto.assetId != null && dto.assetId !== '') {
-				throw new BadRequestException(
-					TRANSACTION_ERROR_MESSAGES.ASSET_FORBIDDEN_FOR_CASH,
-				);
-			}
-		}
-
-		const quantity = isCash ? 1 : dto.quantity;
-
-		const data = {
+		const data = normalizeCreatePayload(dto, portfolioId);
+		await this.assertPortfolioPositionsRemainValid(
 			portfolioId,
-			assetId: isCash ? null : (dto.assetId ?? null),
-			quantity,
-			price: dto.price,
-			type: dto.type,
-			date: new Date(dto.date),
-			currency: dto.currency,
-		};
+			this.buildCreatePositionCandidate(data),
+		);
 
-		const row = await this.prisma.transaction.create({ data });
-		return transctionToResponse(row);
+		const row = await this.prisma.transaction.create({
+			data,
+		});
+		return transactionToResponse(row);
 	}
 
 	async update(
@@ -123,55 +195,39 @@ export class TransactionsService {
 		userId: string,
 		dto: UpdateTransaction,
 	): Promise<TransactionResponse> {
-		await this.ensurePortfolioAccess(portfolioId, userId);
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
 
-		const existing = await this.prisma.transaction.findFirst({
-			where: { id: transactionId, portfolioId },
-		});
+		const existing = await this.findOwnedTransaction(
+			portfolioId,
+			transactionId,
+		);
 
-		if (!existing) {
-			throw new NotFoundException(
-				TRANSACTION_ERROR_MESSAGES.TRANSACTION_NOT_FOUND,
-			);
+		const { effectiveType, effectiveAssetId } = assertValidUpdatePayload(
+			dto,
+			existing,
+		);
+
+		if (isTradeType(effectiveType) && effectiveAssetId) {
+			await this.assetsService.findById(effectiveAssetId);
 		}
 
-		const isTrade = (t: string) => t === 'BUY' || t === 'SELL';
-		const isCash = (t: string) => t === 'DEPOSIT' || t === 'WITHDRAWAL';
-		const type = dto.type ?? existing.type;
-
-		if (dto.assetId !== undefined) {
-			if (isTrade(type) && !dto.assetId) {
-				throw new BadRequestException(
-					TRANSACTION_ERROR_MESSAGES.ASSET_REQUIRED_FOR_TRADE,
-				);
-			}
-
-			if (isCash(type) && dto.assetId != null && dto.assetId !== '') {
-				throw new BadRequestException(
-					TRANSACTION_ERROR_MESSAGES.ASSET_FORBIDDEN_FOR_CASH,
-				);
-			}
-
-			if (isTrade(type) && dto.assetId) {
-				await this.assetsService.findById(dto.assetId);
-			}
-		}
-
-		const data: UpdateTransaction = {
-			assetId: dto.assetId ?? undefined,
-			quantity: dto.quantity,
-			price: dto.price,
-			type: dto.type,
-			date: dto.date ? new Date(dto.date).toISOString() : undefined,
-			currency: dto.currency,
-		};
+		const data = normalizeUpdateData(
+			dto,
+			existing,
+			effectiveType,
+			effectiveAssetId,
+		);
+		await this.assertPortfolioPositionsRemainValid(
+			portfolioId,
+			this.buildUpdatePositionCandidate(existing, data),
+		);
 
 		const row = await this.prisma.transaction.update({
 			where: { id: transactionId },
 			data,
 		});
 
-		return transctionToResponse(row);
+		return transactionToResponse(row);
 	}
 
 	async delete(
@@ -179,17 +235,9 @@ export class TransactionsService {
 		transactionId: string,
 		userId: string,
 	): Promise<void> {
-		await this.ensurePortfolioAccess(portfolioId, userId);
+		await this.portfolioAccessService.assertOwned(portfolioId, userId);
 
-		const existing = await this.prisma.transaction.findFirst({
-			where: { id: transactionId, portfolioId },
-		});
-
-		if (!existing) {
-			throw new NotFoundException(
-				TRANSACTION_ERROR_MESSAGES.TRANSACTION_NOT_FOUND,
-			);
-		}
+		await this.findOwnedTransaction(portfolioId, transactionId);
 
 		await this.prisma.transaction.delete({ where: { id: transactionId } });
 	}

@@ -1,10 +1,13 @@
-import { useField, useForm } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
 import type { CurrencyType, TransactionType } from '@atlas/types';
+
+import { toTypedSchema } from '@vee-validate/zod';
+import { useField, useForm } from 'vee-validate';
+
 import {
-	addTransactionSchema,
 	type AddTransactionFormValues,
+	addTransactionSchema,
 } from '../schemas/addTransactionSchema';
+
 
 function defaultFormValues(): AddTransactionFormValues {
 	return {

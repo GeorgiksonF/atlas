@@ -3,7 +3,7 @@ import type { PortfolioBroker } from '@atlas/types';
 export const PORTFOLIO_BROKERS = {
 	T_INVESTMENT: 'Т-Инвестиции',
 	SBER: 'Сбербанк Инвестор',
-	VTP: 'ВТБ Мои Инвестиции',
+	VTB: 'ВТБ Мои Инвестиции',
 	ALPHA: 'Альфа-Банк',
 	OTKRITIE: 'Открытие Брокер',
 	BKS: 'БКС',

@@ -1,7 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
+
+import { useAuthStore } from '@/features/auth/stores/authStore';
+
 import LandingView from '../views/LandingView.vue';
 import LoginView from '../views/LoginView.vue';
-import { usePortfoliosStore } from '@/features/portfolios/stores/portfoliosStore.ts';
+
 const router = createRouter({
 	history: createWebHistory(),
 	routes: [
@@ -13,19 +16,13 @@ const router = createRouter({
 		{
 			path: '/login',
 			name: 'login',
+			meta: { requiresGuest: true },
 			component: LoginView,
 		},
 		{
 			path: '/app',
 			name: 'app',
-			async beforeEnter() {
-				const store = usePortfoliosStore();
-				try {
-					await store.fetchPortfolios();
-				} catch {
-					store.setLoadError('Не удалось загрузить портфели');
-				}
-			},
+			meta: { requiresAuth: true },
 			component: () => import('../views/AppLayout.vue'),
 			redirect: { name: 'portfolio' },
 			children: [
@@ -47,7 +44,7 @@ const router = createRouter({
 				{
 					path: 'management',
 					name: 'portfolioManagement',
-					component: () => import('../views/ManagePortfoliosView.vue'),
+					component: () => import('../views/PortfoliosManagerView.vue'),
 				},
 				{
 					path: 'management/:id/edit',
@@ -57,6 +54,18 @@ const router = createRouter({
 			],
 		},
 	],
+});
+
+router.beforeEach((to) => {
+	const authStore = useAuthStore();
+
+	if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+		return { name: 'login' };
+	}
+
+	if (to.meta.requiresGuest && authStore.isAuthenticated) {
+		return { name: 'portfolio' };
+	}
 });
 
 export default router;

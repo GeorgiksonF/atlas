@@ -1,7 +1,8 @@
 import type { TransactionResponse } from './transactions';
 import type { PortfolioBroker } from './broker'
 
-export type PortfolioCategory = 'INVESTMENTS' | 'CRYPTO';
+export const PORTFOLIO_CATEGORIES = ['INVESTMENTS', 'CRYPTO'] as const;
+export type PortfolioCategory = (typeof PORTFOLIO_CATEGORIES)[number];
 
 export type CreatePortfolio = {
 	name: string;

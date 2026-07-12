@@ -1,5 +1,5 @@
 import type { CreateTransaction, UpdateTransaction } from '@atlas/types';
-import { TRANSACTION_TYPES } from '../constants/transactionTypes';
+
 import {
 	IsDateString,
 	IsIn,
@@ -9,6 +9,8 @@ import {
 	IsString,
 	IsUUID,
 } from 'class-validator';
+
+import { TRANSACTION_TYPES } from '../constants/transactionTypes';
 
 const CURRENCIES = ['RUB', 'USD'] as const;
 

@@ -1,22 +1,14 @@
-import { apiClient } from '@/shared/api/client';
-import type {
-	RegisterRequest,
-	RegisterResponse,
-	LoginRequest,
-} from '@atlas/types';
+import type { AuthResponse, LoginRequest, RegisterRequest } from '@atlas/types';
 
-export interface LoginResponse {
-	access_token: string;
-	user: { id: string; email: string; name: string };
-}
+import { apiClient } from '@/shared/api/client';
 
 export const authRepository = {
-	async register(data: RegisterRequest): Promise<RegisterResponse> {
-		const response = await apiClient.post<RegisterResponse>('/auth/register', data);
+	async register(data: RegisterRequest): Promise<AuthResponse> {
+		const response = await apiClient.post<AuthResponse>('/auth/register', data);
 		return response.data;
 	},
-	async login(data: LoginRequest): Promise<LoginResponse> {
-		const response = await apiClient.post<LoginResponse>('/auth/login', data);
+	async login(data: LoginRequest): Promise<AuthResponse> {
+		const response = await apiClient.post<AuthResponse>('/auth/login', data);
 		return response.data;
 	},
 };

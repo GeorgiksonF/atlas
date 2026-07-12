@@ -1,5 +1,9 @@
 <template>
 	<section class="flex flex-col gap-3" aria-label="Ключевые показатели портфеля">
+		<Message v-if="error" severity="error" class="w-full" :closable="false">
+			{{ error }}
+		</Message>
+
 		<div
 			v-if="summary"
 			class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"
@@ -64,12 +68,13 @@
 </template>
 
 <script setup lang="ts">
-import PortfolioMetricWidget from '@/shared/components/PortfolioMetricWidget.vue';
-import { formatPercent, formatMoney } from '@utils';
-import { PORTFOLIO_METRIC_TOOLTIPS } from '../constants/constants';
-import { usePortfolioSummary } from '../composables/usePortfolioSummary';
+import { formatMoney, formatPercent } from '@utils';
 
-const { summary, loading } = usePortfolioSummary();
+import { usePortfolioSummary } from '../composables/usePortfolioSummary';
+import { PORTFOLIO_METRIC_TOOLTIPS } from '../constants/constants';
+import PortfolioMetricWidget from './PortfolioMetricWidget.vue';
+
+const { summary, error, loading } = usePortfolioSummary();
 
 function profitAmountClass(amount: number): string {
 	if (amount > 0) {

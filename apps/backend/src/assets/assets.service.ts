@@ -1,18 +1,16 @@
-import {
-	BadRequestException,
-	Injectable,
-	NotFoundException,
-} from '@nestjs/common';
-import { PrismaClient } from '@atlas/database';
+import { Injectable, NotFoundException } from '@nestjs/common';
+
+import { Prisma, PrismaClient } from '@atlas/database';
 import type {
 	AssetResponse,
+	AssetSearchItem,
 	AssetsResponse,
 	AssetWithQuoteResponse,
-	CreateAsset,
-	UpdateAsset,
 } from '@atlas/types';
+
 import { ASSET_ERROR_MESSAGES } from './constants/messages';
 import { assetWithQuotesToResponse } from './utils/adapters';
+
 @Injectable()
 export class AssetsService {
 	constructor(private readonly prisma: PrismaClient) {}
@@ -54,80 +52,49 @@ export class AssetsService {
 		return response.map(assetWithQuotesToResponse);
 	}
 
-	async findAllWithQuotes(): Promise<AssetWithQuoteResponse[]> {
-		const response = await this.prisma.asset.findMany({
-			include: { quote: true },
-		});
-
-		if (!response.length) {
-			return [];
-		}
-
-		return response.map(assetWithQuotesToResponse);
-	}
-
 	async findByTicker(ticker: string): Promise<AssetResponse | null> {
 		return this.prisma.asset.findUnique({
 			where: { ticker: ticker.toUpperCase() },
 		});
 	}
 
-	async create(dto: CreateAsset): Promise<AssetResponse> {
-		const ticker = dto.ticker.trim().toUpperCase();
-		const existing = await this.prisma.asset.findUnique({
-			where: { ticker },
+	async findByTickerWithQuote(
+		ticker: string,
+	): Promise<AssetWithQuoteResponse | null> {
+		const asset = await this.prisma.asset.findUnique({
+			where: { ticker: ticker.toUpperCase() },
+			include: { quote: true },
 		});
-		if (existing) {
-			throw new BadRequestException(
-				ASSET_ERROR_MESSAGES.TICKER_ALREADY_EXISTS,
-			);
+
+		if (!asset) {
+			return null;
 		}
-		return this.prisma.asset.create({
-			data: {
-				name: dto.name.trim(),
-				ticker,
-				type: dto.type,
-			},
-		});
+
+		return assetWithQuotesToResponse(asset);
 	}
 
-	async update(id: string, dto: UpdateAsset): Promise<AssetResponse> {
-		const asset = await this.prisma.asset.findUnique({ where: { id } });
-		if (!asset) {
-			throw new NotFoundException(ASSET_ERROR_MESSAGES.ASSET_NOT_FOUND);
-		}
-		const data: {
-			name?: string;
-			ticker?: string;
-			type?: UpdateAsset['type'];
-		} = {};
-		if (dto.name !== undefined) data.name = dto.name.trim();
-		if (dto.ticker !== undefined) {
-			const ticker = dto.ticker.trim().toUpperCase();
-			if (ticker !== asset.ticker) {
-				const existing = await this.prisma.asset.findUnique({
-					where: { ticker },
-				});
+	async createFromExchangeItem(
+		item: AssetSearchItem,
+	): Promise<AssetResponse> {
+		try {
+			return await this.prisma.asset.create({
+				data: {
+					ticker: item.ticker,
+					name: item.name,
+					type: item.type,
+				},
+			});
+		} catch (e) {
+			if (
+				e instanceof Prisma.PrismaClientKnownRequestError &&
+				e.code === 'P2002'
+			) {
+				const existing = await this.findByTicker(item.ticker);
 				if (existing) {
-					throw new BadRequestException(
-						ASSET_ERROR_MESSAGES.TICKER_ALREADY_EXISTS,
-					);
+					return existing;
 				}
-				data.ticker = ticker;
 			}
+			throw e;
 		}
-		if (dto.type !== undefined) data.type = dto.type;
-		return this.prisma.asset.update({
-			where: { id },
-			data,
-		});
-	}
-
-	async delete(id: string): Promise<void> {
-		const asset = await this.prisma.asset.findUnique({ where: { id } });
-		if (!asset) {
-			throw new NotFoundException(ASSET_ERROR_MESSAGES.ASSET_NOT_FOUND);
-		}
-		await this.prisma.asset.delete({ where: { id } });
 	}
 }

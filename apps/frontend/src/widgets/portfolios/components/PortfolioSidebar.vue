@@ -1,7 +1,7 @@
 <template>
 	<Transition name="portfolio-sidebar-fade">
 		<aside
-			v-if="store.isPortfolioSidebarOpen"
+			v-if="portfolioUiStore.isPortfolioSidebarOpen"
 			ref="asideRoot"
 			class="absolute left-0 top-0 bottom-0 z-10 flex w-90 flex-col border-r border-slate-600 bg-slate-900"
 		>
@@ -19,43 +19,62 @@
 					title="Инвестиции"
 					:badge="store.portfolios.length"
 				>
-					<div v-for="p in store.portfolios" :key="p.id" class="relative rounded-lg">
-						<PortfoliosListItem
-							icon="pi pi-wallet"
-							:portfolio="p"
-							:active="store.activePortfolio.id === p.id"
-							@click="selectPortfolio(p.id)"
-						/>
-					</div>
+					<PortfoliosListItem
+						v-for="p in store.portfolios"
+						:key="p.id"
+						class="relative rounded-lg"
+						icon="pi pi-wallet"
+						:menu-items="getPortfolioMenuItems(p)"
+						:portfolio="p"
+						:active="store.activePortfolio.id === p.id"
+						@click="selectPortfolio(p.id)"
+					/>
 				</CollapsibleSection>
 
-				<AddPortfolioButton />
+				<PortfolioAddButton />
 			</div>
 		</aside>
 	</Transition>
 </template>
 
 <script setup lang="ts">
-import AddPortfolioButton from './AddPortfolioButton.vue';
-import { CollapsibleSection } from '@components';
-import { usePortfoliosStore, ALL_PORTFOLIOS_CONTEXT } from '@features/portfolios';
-import { PortfoliosListItem } from '@entities/portfolios';
-import { onClickOutside } from '@vueuse/core';
 import { ref } from 'vue';
 
+import { CollapsibleSection } from '@components';
+import { ALL_PORTFOLIOS_CONTEXT, PortfoliosListItem } from '@entities/portfolios';
+import {
+	usePortfolioDeleteConfirm,
+	usePortfolioMenuItems,
+	usePortfoliosStore,
+	usePortfolioUiStore,
+} from '@features/portfolios';
+
+import { onClickOutside } from '@vueuse/core';
+
+import PortfolioAddButton from './PortfolioAddButton.vue';
+
 const store = usePortfoliosStore();
+const portfolioUiStore = usePortfolioUiStore();
+const { confirmDeletePortfolio } = usePortfolioDeleteConfirm({
+	afterSuccess: () => {
+		if (portfolioUiStore.isPortfolioSidebarOpen) {
+			portfolioUiStore.closePortfolioSidebar();
+		}
+	},
+});
+const { getPortfolioMenuItems } = usePortfolioMenuItems(confirmDeletePortfolio);
 
 const isInvestmentsExpanded = ref(true);
 const asideRoot = ref<HTMLElement | null>(null);
 
-onClickOutside(asideRoot, () => store.togglePortfolioSidebar(), {
+onClickOutside(asideRoot, () => portfolioUiStore.closePortfolioSidebar(), {
 	ignore: ['.portfolio-sidebar-trigger', '[data-pc-name="menu"]'],
 });
 
-function selectPortfolio(id: string) {
+const selectPortfolio = (id: string) => {
 	store.setActivePortfolio(id);
-	store.togglePortfolioSidebar();
-}
+	portfolioUiStore.closePortfolioSidebar();
+};
 </script>
 
 <style scoped>

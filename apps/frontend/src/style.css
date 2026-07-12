@@ -2,11 +2,6 @@
 @import 'primeicons/primeicons.css';
 @import '@fortawesome/fontawesome-free/css/all.min.css';
 
-@theme {
-	/* Здесь вы можете определить свою цветовую палитру */
-}
-
-/* Глобальные стили */
 * {
 	box-sizing: border-box;
 }

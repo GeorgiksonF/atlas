@@ -1,5 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+
 import { createPrismaClient, PrismaClient } from '@atlas/database';
 
 @Global()
